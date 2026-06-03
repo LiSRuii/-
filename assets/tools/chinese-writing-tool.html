@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📝 寫作小精靈</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<style>
+/* ========== CSS 變數 ========== */
+:root {
+  --green: #E8F5E9; --green-dark: #43A047;
+  --blue: #E3F2FD; --blue-dark: #1E88E5;
+  --yellow: #FFF8E7; --yellow-dark: #F9A825;
+  --pink: #FCE4EC; --pink-dark: #E91E63;
+  --orange: #FFF3E0; --orange-dark: #E65100;
+  --text: #333; --text-light: #666; --text-lighter: #999;
+  --radius: 12px; --transition: 0.25s ease;
+  --shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  background: linear-gradient(135deg, #fef9e7 0%, #e8f5e9 50%, #e3f2fd 100%);
+  min-height: 100vh; color: var(--text); line-height: 1.6;
+}
+
+/* ========== Header ========== */
+.header {
+  background: white; padding: 14px 24px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-title { font-size: 1.3rem; font-weight: 700; color: var(--green-dark); }
+
+/* ========== 主佈局 ========== */
+.main-container {
+  display: flex; gap: 20px; padding: 20px;
+  max-width: 1400px; margin: 0 auto; min-height: calc(100vh - 160px);
+}
+.left-panel, .right-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+
+/* ========== 卡片通用 ========== */
+.card {
+  background: white; border-radius: var(--radius); padding: 18px;
+  box-shadow: var(--shadow); transition: var(--transition);
+}
+
+/* ========== 評分標準設定面板 ========== */
+.settings-summary {
+  cursor: pointer; font-weight: 700; color: var(--green-dark);
+  padding: 4px 0; font-size: 0.95rem; user-select: none;
+}
+.settings-summary:hover { opacity: 0.8; }
+.settings-grid {
+  display: flex; flex-direction: column; gap: 8px; margin-top: 10px;
+}
+.settings-item { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+.settings-item label { cursor: pointer; display: flex; align-items: center; gap: 6px; }
+.settings-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--green-dark); }
+.settings-item input[type="number"] {
+  width: 56px; padding: 3px 6px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.85rem; text-align: center;
+}
+.settings-grade-select {
+  padding: 6px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.85rem; background: white;
+}
+.api-section { border-top: 1px dashed #ddd; padding-top: 10px; margin-top: 6px; }
+.api-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+.api-row input[type="password"] {
+  flex: 1; min-width: 200px; padding: 6px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.85rem;
+}
+.api-status { font-size: 0.8rem; margin-left: 4px; }
+.api-status.ok { color: var(--green-dark); }
+.api-status.off { color: var(--text-lighter); }
+
+/* ========== 文章輸入 ========== */
+#articleInput {
+  width: 100%; min-height: 180px; padding: 14px;
+  border: 2px solid #e0e0e0; border-radius: var(--radius);
+  font-size: 1rem; font-family: inherit; line-height: 1.8;
+  resize: vertical; transition: var(--transition); background: #fafafa;
+}
+#articleInput:focus {
+  outline: none; border-color: var(--green-dark); background: white;
+  box-shadow: 0 0 0 3px rgba(67,160,71,0.1);
+}
+
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.btn {
+  padding: 9px 18px; border: none; border-radius: 22px;
+  font-size: 0.9rem; cursor: pointer; transition: var(--transition);
+  font-weight: 600; display: flex; align-items: center; gap: 6px;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(0,0,0,0.12); }
+.btn:active { transform: translateY(0); }
+.btn-primary { background: var(--green-dark); color: white; }
+.btn-secondary { background: var(--blue); color: var(--blue-dark); border: 1px solid #bbdefb; }
+.btn-outline { background: white; color: var(--green-dark); border: 2px solid var(--green-dark); }
+.btn-small { padding: 4px 10px; font-size: 0.8rem; border-radius: 14px; }
+
+/* AI 狀態指示燈 */
+.ai-indicator {
+  display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text-lighter);
+  margin-top: -4px;
+}
+.ai-dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; }
+.ai-dot.loading { background: #f9a825; animation: pulse 1s infinite; }
+.ai-dot.done { background: var(--green-dark); }
+.ai-dot.error { background: #e53935; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* ========== 文章預覽 ========== */
+.article-display {
+  background: #fefefe; border: 1px solid #eee; border-radius: var(--radius);
+  padding: 16px; line-height: 2; font-size: 0.95rem;
+  max-height: 350px; overflow-y: auto;
+}
+.sentence-wrap {
+  display: inline; padding: 2px 1px; border-radius: 3px; cursor: default;
+}
+.hl-typo { background: #ffcdd2; border-bottom: 2px wavy #c62828; }
+.hl-colloquial { background: #ffe0b2; border-bottom: 2px wavy #e65100; }
+.hl-long { background: #fff9c4; border-bottom: 2px wavy #f9a825; }
+.hl-repeat { background: #fff3e0; border-bottom: 2px dotted #e65100; }
+.hl-rhetoric { background: #c8e6c9; border-bottom: 2px dotted #2e7d32; }
+
+/* ========== 建議卡片 ========== */
+.guidance-section-title {
+  font-size: 1rem; font-weight: 700; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.guidance-card {
+  background: white; border-left: 4px solid var(--yellow-dark);
+  border-radius: 8px; padding: 14px; margin-bottom: 10px;
+  transition: var(--transition); animation: slideIn 0.3s ease;
+}
+.guidance-card.praise { border-left-color: var(--green-dark); background: #f9fdf9; }
+.guidance-card.typo { border-left-color: #e53935; }
+.guidance-card.colloquial { border-left-color: #e65100; }
+.guidance-card.structure { border-left-color: var(--blue-dark); }
+.guidance-card.writing { border-left-color: var(--yellow-dark); }
+.guidance-card.rhetoric { border-left-color: var(--green-dark); }
+.guidance-card.depth { border-left-color: #7c4dff; }
+
+/* ========== 評分顯示 ========== */
+.score-card {
+  background: white; border-radius: var(--radius); padding: 20px;
+  box-shadow: var(--shadow);
+}
+.score-standard-badge {
+  display: inline-block; font-size: 0.78rem; color: var(--text-light);
+  background: #f5f5f5; padding: 3px 10px; border-radius: 10px; margin-bottom: 14px;
+}
+
+/* 總評等級條 */
+.score-overall { margin-bottom: 16px; }
+.score-overall-label { font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; }
+.score-overall-bar-bg {
+  height: 14px; background: #e8e8e8; border-radius: 7px; overflow: hidden;
+  position: relative;
+}
+.score-overall-bar-fill {
+  height: 100%; border-radius: 7px; transition: width 0.8s ease;
+  display: flex; align-items: center; justify-content: center;
+}
+.score-overall-text {
+  font-size: 0.8rem; font-weight: 700; color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* 各維度 */
+.score-dimensions { text-align: left; }
+.score-dim-section-title {
+  font-size: 0.8rem; color: var(--text-lighter); margin-bottom: 8px;
+  border-top: 1px dashed #e0e0e0; padding-top: 10px;
+}
+.score-dim-row {
+  margin-bottom: 8px;
+}
+.score-dim-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 3px; font-size: 0.85rem;
+}
+.score-dim-label { font-weight: 600; min-width: 65px; }
+.score-dim-grade { font-weight: 700; font-size: 0.9rem; }
+.score-dim-desc {
+  font-size: 0.76rem; color: var(--text-lighter); margin-bottom: 3px;
+  padding-left: 2px;
+}
+.score-dim-bar-bg {
+  width: 100%; height: 6px; background: #e8e8e8; border-radius: 3px; overflow: hidden;
+}
+.score-dim-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+
+.empty-state { text-align: center; padding: 30px 20px; color: #bbb; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.gc-header { font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.gc-body { font-size: 0.88rem; color: var(--text-light); line-height: 1.65; }
+.gc-question {
+  background: #fafafa; padding: 10px; border-radius: 6px;
+  margin: 6px 0; border: 1px solid #eee; font-style: italic;
+}
+.gc-original { font-size: 0.8rem; color: var(--text-lighter); margin-top: 4px; }
+.gc-refs { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.gc-ref-chip {
+  padding: 3px 10px; background: #e8f5e9; border: 1px solid #a5d6a7;
+  border-radius: 14px; font-size: 0.8rem; color: var(--green-dark);
+}
+.empty-state { text-align: center; padding: 30px 20px; color: #bbb; }
+
+/* ========== 拍照模態框（保持不變） ========== */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(4px); z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.scan-modal {
+  background: white; border-radius: 16px; width: 90%; max-width: 500px;
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.scan-modal-header {
+  padding: 14px 18px; border-bottom: 1px solid #eee;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.scan-modal-close {
+  width: 30px; height: 30px; border: none; background: #f5f5f5;
+  border-radius: 50%; cursor: pointer; font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.scan-modal-body { padding: 18px; }
+
+.scan-mode-tabs {
+  display: flex; gap: 3px; background: #f5f5f5;
+  border-radius: 10px; padding: 3px; margin-bottom: 14px;
+}
+.scan-mode-tab {
+  flex: 1; padding: 9px 6px; border: none; background: transparent;
+  cursor: pointer; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+  text-align: center; transition: var(--transition);
+}
+.scan-mode-tab.active { background: white; color: var(--green-dark); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+
+.camera-viewfinder {
+  position: relative; width: 100%; aspect-ratio: 4/3;
+  background: #1a1a1a; border-radius: 12px; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.camera-viewfinder video { width: 100%; height: 100%; object-fit: cover; }
+.camera-placeholder { color: #666; text-align: center; font-size: 0.9rem; }
+.camera-placeholder .cam-icon { font-size: 2.5rem; display: block; margin-bottom: 8px; }
+.camera-flash { position: absolute; inset: 0; background: white; opacity: 0; pointer-events: none; transition: opacity 0.1s; }
+.camera-flash.flash { opacity: 1; }
+
+.upload-zone {
+  width: 100%; aspect-ratio: 4/3; border: 2px dashed #ccc;
+  border-radius: 12px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; cursor: pointer;
+  transition: var(--transition); background: #fafafa; gap: 6px;
+}
+.upload-zone:hover { border-color: var(--green-dark); background: var(--green); }
+
+.photo-preview { position: relative; width: 100%; border-radius: 12px; overflow: hidden; }
+.photo-preview img { width: 100%; display: block; border-radius: 12px; }
+
+.ocr-overlay {
+  position: absolute; inset: 0; background: rgba(255,255,255,0.92);
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; border-radius: 12px; gap: 10px;
+}
+.ocr-spinner { width: 36px; height: 36px; border: 4px solid #e0e0e0; border-top-color: var(--green-dark); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ocr-progress-bar { width: 180px; height: 5px; background: #e0e0e0; border-radius: 3px; overflow: hidden; }
+.ocr-progress-fill { height: 100%; background: var(--green-dark); border-radius: 3px; transition: width 0.3s; }
+.scan-actions { display: flex; gap: 8px; margin-top: 10px; justify-content: center; }
+#scanFileInput { display: none; }
+
+/* ========== Toast ========== */
+.toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: #333; color: white; padding: 10px 22px; border-radius: 22px;
+  font-size: 0.88rem; z-index: 1000; pointer-events: none;
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards;
+}
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
+
+/* ========== 響應式 ========== */
+@media (max-width: 768px) {
+  .main-container { flex-direction: column; padding: 10px; }
+  .left-panel, .right-panel { flex: none; width: 100%; }
+  .header { padding: 10px 14px; }
+  .header-title { font-size: 1.1rem; }
+  .article-display { max-height: 220px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ========== Header ========== -->
+<div class="header">
+  <div class="header-title">📝 寫作小精靈</div>
+</div>
+
+<!-- ========== 主內容 ========== -->
+<div class="main-container">
+  <!-- 左欄 -->
+  <div class="left-panel">
+    <!-- 評分標準設定 -->
+    <details class="card" id="settingsPanel">
+      <summary class="settings-summary">⚙️ 評分標準設定</summary>
+      <div class="settings-grid">
+        <div class="settings-item">
+          <label>年級預設：</label>
+          <select class="settings-grade-select" id="gradePreset">
+            <option value="p1-p2">小一至小二</option>
+            <option value="p3-p4" selected>小三至小四</option>
+            <option value="p5-p6">小五至小六</option>
+          </select>
+        </div>
+        <div class="settings-item">
+          <label>評分標準：</label>
+          <select class="settings-grade-select" id="scoringStandard">
+            <option value="tsa">📜 TSA 官方評分標準</option>
+            <option value="school">🏫 校內考試／呈分試標準</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:0.78rem;color:var(--text-lighter);margin-top:6px;" id="standardPreview">
+        📜 TSA：內容 · 結構 · 文句 · 詞語運用 · 錯別字 · 標點符號（6 項）
+      </div>
+      <div class="api-section">
+        <div class="settings-item">
+          <label><input type="checkbox" id="chkDeepseek"> 🤖 啟用 DeepSeek API 深度分析（含評分）</label>
+          <span class="api-status off" id="apiStatus">（未啟用）</span>
+        </div>
+        <div class="api-row" id="apiKeyRow" style="display:none;">
+          <span style="font-size:0.85rem;">API Key：</span>
+          <input type="password" id="apiKeyInput" placeholder="sk-...">
+          <button class="btn btn-small btn-primary" id="btnSaveKey">儲存</button>
+        </div>
+      </div>
+    </details>
+
+    <!-- 文章輸入 -->
+    <div class="card">
+      <textarea id="articleInput" placeholder="在這裡寫下你的文章，或點擊下方按鈕拍照／上傳作文圖片..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="btnScan">📷 拍照掃描</button>
+        <button class="btn btn-secondary" id="btnUpload">📁 上傳圖片</button>
+        <button class="btn btn-primary" id="btnAnalyze">🔍 開始分析</button>
+      </div>
+      <div class="ai-indicator" id="aiIndicator" style="display:none;">
+        <span class="ai-dot" id="aiDot"></span>
+        <span id="aiStatusText"></span>
+      </div>
+    </div>
+
+    <!-- 文章預覽 -->
+    <div class="card" id="articleDisplayCard" style="display:none;">
+      <div style="font-weight:700;margin-bottom:8px;">📖 文章預覽（標色為 AI 標記處）</div>
+      <div class="article-display" id="articleDisplay"></div>
+    </div>
+  </div>
+
+  <!-- 右欄：修改建議 -->
+  <div class="right-panel" id="rightPanel">
+    <div class="card empty-state" id="emptyState">
+      <div style="font-size:2.5rem;margin-bottom:8px;">🤖</div>
+      <p>輸入文章後點擊「開始分析」，<br>AI 教練會為你提供修改建議！</p>
+    </div>
+    <div id="scoreArea" style="display:none;"></div>
+    <div id="guidanceArea" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ========== 拍照模態框 ========== -->
+<div class="modal-overlay" id="scanModal" style="display:none;">
+  <div class="scan-modal">
+    <div class="scan-modal-header">
+      <span style="font-weight:700;font-size:1.05rem;">📷 掃描作文</span>
+      <button class="scan-modal-close" id="btnScanClose">✕</button>
+    </div>
+    <div class="scan-modal-body">
+      <div class="scan-mode-tabs">
+        <button class="scan-mode-tab active" data-scanmode="camera">📷 拍照</button>
+        <button class="scan-mode-tab" data-scanmode="upload">📁 上傳圖片</button>
+        <button class="scan-mode-tab" data-scanmode="sample">📄 使用範例</button>
+      </div>
+
+      <div class="scan-mode-panel" id="panelCamera">
+        <div class="camera-viewfinder" id="cameraViewfinder">
+          <video id="cameraVideo" autoplay playsinline style="display:none;"></video>
+          <div class="camera-placeholder" id="cameraPlaceholder">
+            <span class="cam-icon">📸</span><span>點擊下方按鈕啟動相機</span>
+          </div>
+          <div class="camera-flash" id="cameraFlash"></div>
+        </div>
+        <div class="scan-actions">
+          <button class="btn btn-primary" id="btnStartCamera" style="border-radius:22px;">📸 啟動相機</button>
+          <button class="btn btn-primary" id="btnCapture" style="display:none;border-radius:22px;">🔴 拍照</button>
+        </div>
+        <canvas id="cameraCanvas" style="display:none;"></canvas>
+      </div>
+
+      <div class="scan-mode-panel" id="panelUpload" style="display:none;">
+        <div class="upload-zone" id="uploadZone">
+          <span style="font-size:2.2rem;">📁</span>
+          <span style="font-weight:600;">點擊此處選擇圖片</span>
+          <span style="font-size:0.8rem;color:#999;">支援 JPG、PNG</span>
+        </div>
+        <input type="file" id="scanFileInput" accept="image/*">
+      </div>
+
+      <div class="scan-mode-panel" id="panelSample" style="display:none;">
+        <div style="text-align:center;padding:20px;">
+          <span style="font-size:2.5rem;display:block;margin-bottom:10px;">📄</span>
+          <p style="color:var(--text-light);margin-bottom:12px;">直接載入一篇模擬的學生初稿</p>
+          <div style="background:#fafafa;padding:10px;border-radius:8px;font-size:0.85rem;color:var(--text-light);text-align:left;">
+            今天天氣很好。我和同學一起去郊野公園。我們玩遊戲。很開心。然後吃東西。吃飽了。回家。今天真是開心的一天。
+          </div>
+        </div>
+      </div>
+
+      <div class="photo-preview" id="photoPreview" style="display:none;">
+        <img id="previewImage" src="" alt="預覽">
+        <div class="ocr-overlay" id="ocrOverlay" style="display:none;">
+          <div class="ocr-spinner"></div>
+          <p style="font-weight:600;">AI 正在辨識文字中...</p>
+          <div class="ocr-progress-bar"><div class="ocr-progress-fill" id="ocrProgressFill" style="width:0%;"></div></div>
+          <p style="font-size:0.8rem;color:#999;" id="ocrProgressText">準備中...</p>
+        </div>
+      </div>
+
+      <div class="scan-actions" id="previewActions" style="display:none;">
+        <button class="btn btn-outline" id="btnRetake">🔄 重拍</button>
+        <button class="btn btn-primary" id="btnUsePhoto">✅ 使用這張照片</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast" style="display:none;"></div>
+
+<script>
+// ======================================================================
+// 常數與內置資料
+// ======================================================================
+
+const STOP_WORDS = new Set([
+  '的','了','我','你','他','她','它','們','是','在','和','也','都','就',
+  '要','會','有','不','這','那','著','過','到','把','被','讓','給','從',
+  '對','與','為','以','及','或','但','而','且','雖然','如果','因為','所以',
+  '很','好','一','個','來','去','上','下','裡','說','看','走','想','還',
+  '可以','沒有','什麼','怎麼','這個','那個','自己','我們','他們','然後'
+]);
+
+// 錯別字對照表（香港小學生常見錯誤）
+const TYPO_MAP = {
+  '辛福': '幸福','己經': '已經','以經': '已經','在去': '再去',
+  '令外': '另外','那里': '那裡','倒底': '到底','希歡': '喜歡',
+  '因該': '應該','決對': '絕對','由其': '尤其','從新': '重新',
+  '在見': '再見','己後': '以後','知到': '知道','到低': '到底',
+  '以爲': '以為','經己': '已經','故鄉': '故鄉', // 注意：應檢查語境
+  '漂高': '漂亮','平長': '平常','報紙': '報紙',
+  '清色': '清楚','幹淨': '乾淨','干淨': '乾淨',
+  '希怪': '奇怪','末來': '未來','來回': '來回',
+  '實再': '實在','由中': '由衷','朗讀': '朗讀',
+  '感倩': '感情','組國': '祖國','尊近': '尊敬',
+};
+
+// 粵語口語 → 書面語對照表
+const COLLOQUIAL_MAP = {
+  '佢': '他/她','哋': '們','呢個': '這個','嗰個': '那個',
+  '邊個': '誰','呢度': '這裡','嗰度': '那裡','而家': '現在',
+  '頭先': '剛才','一陣': '一會兒','成日': '經常','總之': '總而言之',
+  '食飯': '吃飯','食咗': '吃了','瞓覺': '睡覺','返學': '上學',
+  '放學': '下課','畀': '給','拎': '拿','行路': '走路',
+  '講嘢': '說話','傾偈': '聊天','嘅': '的','咗': '了',
+  '緊': '正在','吓': '一下','啱啱': '剛剛','諗': '想',
+  '鍾意': '喜歡','好味': '美味','好嘈': '吵鬧','污糟': '骯髒',
+  '多謝': '謝謝','唔該': '謝謝/麻煩了','點解': '為什麼',
+  '咁': '這樣/那麼','啲': '一些','冇': '沒有','唔': '不',
+  '好搞笑': '很滑稽/很風趣','即係話': '也就是說','係呢': '對了/話說回來',
+  '好開心': '很開心/非常開心','好大': '很大/巨大','好快': '很快/迅速',
+  '好食': '好吃/美味','好睇': '好看/精彩',
+  '啦': '(語氣詞，建議刪除)','囉': '(語氣詞，建議刪除)','喎': '(語氣詞，建議刪除)',
+};
+
+// 近義詞庫
+const SYNONYM_LIBRARY = {
+  '開心': ['雀躍','歡天喜地','心花怒放'],
+  '傷心': ['難過','悲傷','愁眉苦臉'],
+  '漂亮': ['美麗','秀麗','絢麗'],
+  '快': ['迅速','飛快','急速'],
+  '慢慢': ['緩緩','徐徐','漸漸'],
+  '大': ['巨大','廣闊','宏大'],
+  '小': ['微小','細小','玲瓏'],
+  '很多': ['眾多','繁多','不計其數'],
+  '非常': ['十分','極其','格外'],
+  '說': ['說道','訴說','講述'],
+  '看': ['觀看','凝視','眺望'],
+  '走': ['行走','漫步','奔跑'],
+  '想': ['思索','思念','想像'],
+  '喜歡': ['喜愛','鍾愛','傾心'],
+  '好': ['優良','美好','出色'],
+  '吃': ['品嚐','享用','飽餐'],
+  '玩': ['嬉戲','遊玩','玩樂'],
+  '高興': ['欣喜','歡喜','興高采烈'],
+  '安靜': ['寧靜','寂靜','清靜'],
+};
+
+// 修辭關鍵詞
+const RHETORIC_KEYWORDS = ['像','彷彿','猶如','如同','好像','好比','宛若','宛如','似的','一樣'];
+
+// 時間順序詞
+const TIME_ORDER_WORDS = ['首先','然後','接著','最後','之後','一開始','後來','終於','先','再','接下來'];
+
+// 範例文章
+const SAMPLE_ESSAY = '今天天氣很好。我和同學一起去郊野公園。我們玩遊戲。很開心。然後吃東西。吃飽了。回家。今天真是開心的一天。';
+
+// ======================================================================
+// 設定管理 (localStorage)
+// ======================================================================
+
+const DEFAULT_SETTINGS = {
+  grade: 'p3-p4',
+  scoringStandard: 'tsa',
+  useDeepseek: false,
+  apiKey: 'sk-b34161149200457783279189f93eb9f1',
+};
+
+// 年級 → 句子長度/重複詞閾值對照
+const GRADE_PRESETS = {
+  'p1-p2': { sentenceLen: 30, repeatWord: 4 },
+  'p3-p4': { sentenceLen: 40, repeatWord: 3 },
+  'p5-p6': { sentenceLen: 50, repeatWord: 3 },
+};
+
+// 評分標準定義
+const SCORING_STANDARDS = {
+  tsa: {
+    name: 'TSA 官方評分標準',
+    icon: '📜',
+    dimensions: [
+      { key: 'content', label: '內容', maxLevel: 5, weight: 25,
+        levels: ['離題/內容貧乏','不切題/內容空泛','切題、內容一般','切題、內容較充實','切題、中心明確、內容豐富'] },
+      { key: 'structure', label: '結構', maxLevel: 5, weight: 20,
+        levels: ['分段錯誤/沒有分段','未能按重點分段、條理欠清晰','大致能按重點分段、條理一般','能按重點分段、條理較清晰','能按重點分段、條理清晰、互相呼應'] },
+      { key: 'sentences', label: '文句', maxLevel: 4, weight: 20,
+        levels: ['文句不通','大致能運用句子寫作、文句有疏漏','大致能正確運用句子、文句大致通順達意','文句通順達意、句子多變化'] },
+      { key: 'vocabulary', label: '詞語運用', maxLevel: 4, weight: 15,
+        levels: ['用詞不當','大致能運用書面字詞寫作','能運用書面字詞寫作','能恰當地運用書面字詞、用詞豐富'] },
+      { key: 'typos', label: '錯別字', maxLevel: 3, weight: 10,
+        levels: ['錯別字很多','偶有錯別字','錯別字很少'] },
+      { key: 'punctuation', label: '標點符號', maxLevel: 3, weight: 10,
+        levels: ['誤用標點符號頗多','偶爾誤用標點符號','較少誤用標點符號'] },
+    ],
+  },
+  school: {
+    name: '校內考試／呈分試標準',
+    icon: '🏫',
+    dimensions: [
+      { key: 'content', label: '審題與立意', maxLevel: 5, weight: 25,
+        levels: ['離題','偏題','切題但立意一般','切題、立意明確','切題、立意有新意'] },
+      { key: 'material', label: '內容與取材', maxLevel: 5, weight: 20,
+        levels: ['取材貧乏','取材單薄','取材恰當','取材充實','取材充實、結合生活經驗'] },
+      { key: 'structure', label: '結構與組織', maxLevel: 5, weight: 20,
+        levels: ['結構混亂','段落欠分明','段落分明但條理一般','條理清晰','條理清晰、重點突出'] },
+      { key: 'language', label: '語言與表達', maxLevel: 4, weight: 20,
+        levels: ['文句不通','文句有疏漏','文句通順','文句通順、遣詞恰當'] },
+      { key: 'mechanics', label: '書寫規範', maxLevel: 3, weight: 15,
+        levels: ['錯別字及標點錯誤很多','偶有錯別字及標點錯誤','錯別字少、標點正確'] },
+    ],
+  },
+};
+
+function loadSettings() {
+  try {
+    const saved = localStorage.getItem('writing_coach_settings');
+    return saved ? { ...DEFAULT_SETTINGS, ...JSON.parse(saved) } : { ...DEFAULT_SETTINGS };
+  } catch { return { ...DEFAULT_SETTINGS }; }
+}
+
+function saveSettings(s) {
+  try { localStorage.setItem('writing_coach_settings', JSON.stringify(s)); } catch {}
+}
+
+let settings = loadSettings();
+
+function getThresholds() {
+  const grade = settings.grade;
+  return GRADE_PRESETS[grade] || GRADE_PRESETS['p3-p4'];
+}
+
+function getScoringStandard() {
+  return SCORING_STANDARDS[settings.scoringStandard] || SCORING_STANDARDS['tsa'];
+}
+
+function applySettingsToUI() {
+  document.getElementById('gradePreset').value = settings.grade;
+  document.getElementById('scoringStandard').value = settings.scoringStandard;
+  document.getElementById('chkDeepseek').checked = settings.useDeepseek;
+  document.getElementById('apiKeyInput').value = settings.apiKey || '';
+  document.getElementById('apiKeyRow').style.display = settings.useDeepseek ? 'flex' : 'none';
+  updateStandardPreview();
+  updateApiStatus();
+}
+
+function updateStandardPreview() {
+  const std = getScoringStandard();
+  const dims = std.dimensions.map(d => d.label).join(' · ');
+  document.getElementById('standardPreview').textContent = std.icon + ' ' + std.name + '：' + dims + '（' + std.dimensions.length + ' 項）';
+}
+
+function updateApiStatus() {
+  const statusEl = document.getElementById('apiStatus');
+  const chk = document.getElementById('chkDeepseek').checked;
+  if (!chk) { statusEl.textContent = '（未啟用）'; statusEl.className = 'api-status off'; }
+  else if (!settings.apiKey) { statusEl.textContent = '（請輸入 API Key）'; statusEl.className = 'api-status off'; }
+  else { statusEl.textContent = '（已就緒）'; statusEl.className = 'api-status ok'; }
+}
+
+// ======================================================================
+// 正則工具
+// ======================================================================
+
+function splitSentences(text) {
+  const raw = text.match(/[^。！？；\n]*[。！？；\n]?/g) || [];
+  return raw.map(s => s.trim()).filter(s => s.length > 0);
+}
+
+// ======================================================================
+// 規則引擎
+// ======================================================================
+
+const ruleEngine = {
+  // 錯別字檢查
+  detectTypos(text) {
+    const results = [];
+    for (const [wrong, correct] of Object.entries(TYPO_MAP)) {
+      let idx = text.indexOf(wrong);
+      while (idx !== -1) {
+        results.push({ word: wrong, correct, position: idx });
+        idx = text.indexOf(wrong, idx + 1);
+      }
+    }
+    return results;
+  },
+
+  // 粵語口語檢查
+  detectColloquial(text) {
+    const results = [];
+    for (const [word, suggestion] of Object.entries(COLLOQUIAL_MAP)) {
+      let idx = text.indexOf(word);
+      while (idx !== -1) {
+        results.push({ word, suggestion, position: idx });
+        idx = text.indexOf(word, idx + 1);
+      }
+    }
+    return results;
+  },
+
+  // 過長句子
+  detectLongSentences(sentences, threshold) {
+    return sentences
+      .filter(s => s.replace(/[，、\s]/g, '').length > threshold)
+      .map((s, i) => ({ index: i, text: s, length: s.replace(/[，、\s]/g, '').length }));
+  },
+
+  // 重複詞語
+  detectRepeatedWords(paragraphs, threshold) {
+    const results = [];
+    paragraphs.forEach((para, pIdx) => {
+      const cleaned = para.replace(/[，。！？；、\n\r\s]/g, '');
+      const freq = {};
+      for (let len of [2, 3]) {
+        for (let i = 0; i <= cleaned.length - len; i++) {
+          const w = cleaned.substring(i, i + len);
+          if (STOP_WORDS.has(w)) continue;
+          freq[w] = (freq[w] || 0) + 1;
+        }
+      }
+      for (const [word, count] of Object.entries(freq)) {
+        if (count >= threshold) {
+          const synonyms = SYNONYM_LIBRARY[word] || [];
+          results.push({ word, count, paragraph: pIdx, synonyms });
+        }
+      }
+    });
+    return results;
+  },
+
+  // 結構分析
+  analyzeStructure(text, sentenceCount) {
+    const totalChars = text.replace(/\s/g, '').length;
+    const paragraphs = text.split(/\n+/).filter(p => p.trim());
+    const issues = [];
+    const strengths = [];
+
+    if (totalChars < 80) issues.push({ type: 'too_short', message: '文章字數偏少（不足80字），建議補充細節。' });
+    else strengths.push('文章長度適中，有足夠的內容。');
+
+    if (paragraphs.length < 3) issues.push({ type: 'few_para', message: '文章段落較少，建議分為開頭、經過、結尾三部分。' });
+    else strengths.push('段落分明，結構清楚。');
+
+    const firstPara = paragraphs[0] || '';
+    const lastPara = paragraphs[paragraphs.length - 1] || '';
+    const hasTimeWords = TIME_ORDER_WORDS.some(w => text.includes(w));
+    const hasOpening = firstPara.length > 10;
+    const hasEnding = lastPara.includes('感受') || lastPara.includes('覺得') || lastPara.includes('學到') ||
+                       lastPara.includes('明白') || lastPara.includes('希望') || lastPara.includes('真是') ||
+                       lastPara.includes('開心') || lastPara.includes('難忘');
+
+    if (!hasOpening) issues.push({ type: 'no_opening', message: '文章開頭可以加入時間、地點、人物，讓讀者更快進入情境。' });
+    else strengths.push('開頭清楚交代了背景。');
+
+    if (!hasEnding) issues.push({ type: 'no_ending', message: '文章結尾可以寫寫你的感受或學到的道理。' });
+    else strengths.push('結尾有表達感受，讓文章更完整。');
+
+    if (hasTimeWords) strengths.push('運用了時間順序詞，文章時序清晰。');
+
+    return { issues, strengths, totalChars, paragraphCount: paragraphs.length, hasTimeWords };
+  },
+
+  // 修辭偵測
+  detectRhetoric(text) {
+    const detected = [];
+    RHETORIC_KEYWORDS.forEach(kw => {
+      let idx = text.indexOf(kw);
+      while (idx !== -1) {
+        const start = Math.max(0, idx - 10);
+        const end = Math.min(text.length, idx + kw.length + 15);
+        const context = (start > 0 ? '…' : '') + text.substring(start, end) + (end < text.length ? '…' : '');
+        detected.push({ keyword: kw, context, position: idx });
+        idx = text.indexOf(kw, idx + 1);
+      }
+    });
+
+    const paragraphs = text.split(/\n+/).filter(p => p.trim());
+    const overusedParas = [];
+    paragraphs.forEach((para, i) => {
+      let count = 0;
+      RHETORIC_KEYWORDS.forEach(kw => {
+        let idx = para.indexOf(kw);
+        while (idx !== -1) { count++; idx = para.indexOf(kw, idx + 1); }
+      });
+      if (count > 2) overusedParas.push({ paragraph: i, count, text: para.substring(0, 40) + '…' });
+    });
+
+    return { detected, overusedParas };
+  },
+
+  // 標點符號檢測
+  detectPunctuation(text) {
+    const issues = [];
+    const totalChars = text.replace(/\s/g, '').length;
+    if (totalChars === 0) return { issues, score: 3, maxLevel: 3 };
+
+    // 檢查是否有明顯的標點錯誤
+    const sentences = splitSentences(text);
+
+    // 1. 檢查連續逗號
+    if (text.includes('，，')) issues.push('連續使用逗號');
+    // 2. 檢查連續句號
+    if (text.includes('。。')) issues.push('連續使用句號');
+    // 3. 檢查驚嘆號過多（>2個）
+    const exclamCount = (text.match(/！/g) || []).length;
+    if (exclamCount > 2) issues.push('驚嘆號使用過多（' + exclamCount + ' 次）');
+    // 4. 檢查缺少句號結尾
+    const lastChar = text.trim().slice(-1);
+    if (sentences.length > 1 && !'。！？'.includes(lastChar)) {
+      issues.push('文章結尾缺少句號');
+    }
+    // 5. 檢查句子是否都以標點結尾
+    let missingEnd = 0;
+    sentences.forEach(s => { if (s.length > 5 && !/[。！？；]$/.test(s)) missingEnd++; });
+    if (missingEnd > 0) issues.push('有 ' + missingEnd + ' 個句子缺少結尾標點');
+
+    // 計算標點得分等級 (TSA 1-3級)
+    let score = 3; // 預設很少錯誤
+    if (issues.length >= 3) score = 1;  // 錯誤頗多
+    else if (issues.length >= 1) score = 2;  // 偶有錯誤
+
+    return { issues, score, maxLevel: 3 };
+  },
+
+  // 主分析（所有檢查維度全開，由評分標準決定顯示哪些）
+  analyze(text, thresholds) {
+    const sentences = splitSentences(text);
+    const paragraphs = text.split(/\n+/).filter(p => p.trim());
+    if (paragraphs.length === 0 && text.trim()) paragraphs.push(text.trim());
+
+    return {
+      sentences,
+      typos: this.detectTypos(text),
+      colloquialWords: this.detectColloquial(text),
+      longSentences: this.detectLongSentences(sentences, thresholds.sentenceLen),
+      repeatedWords: this.detectRepeatedWords(paragraphs, thresholds.repeatWord),
+      structure: this.analyzeStructure(text, sentences.length),
+      rhetoric: this.detectRhetoric(text),
+      punctuation: this.detectPunctuation(text),
+    };
+  },
+};
+
+// ======================================================================
+// 本地評分引擎
+// ======================================================================
+
+const localScoring = {
+  score(analysis, standardKey) {
+    const std = SCORING_STANDARDS[standardKey] || SCORING_STANDARDS['tsa'];
+    const dimScores = {};
+
+    std.dimensions.forEach(dim => {
+      dimScores[dim.key] = this.scoreDimension(analysis, dim, standardKey);
+    });
+
+    return { dimensions: dimScores, standard: std, standardKey };
+  },
+
+  scoreDimension(analysis, dim, standardKey) {
+    const text = (analysis.sentences || []).map(s => s).join('');
+    const totalChars = text.replace(/\s/g, '').length;
+
+    switch (dim.key) {
+      case 'content':
+        // 內容由 AI 判斷，本地僅給中位數
+        return { level: 3, maxLevel: dim.maxLevel };
+
+      case 'structure': {
+        const st = analysis.structure || {};
+        let level = 3;
+        if (st.paragraphCount >= 3 && st.hasOpening && st.hasEnding) level = 5;
+        else if (st.paragraphCount >= 3 && (st.hasOpening || st.hasEnding)) level = 4;
+        else if (st.paragraphCount >= 2) level = 3;
+        else if (st.paragraphCount >= 1) level = 2;
+        else level = 1;
+        if (totalChars < 50) level = Math.min(level, 2);
+        return { level, maxLevel: dim.maxLevel };
+      }
+
+      case 'sentences':
+      case 'language': {
+        const longRatio = (analysis.longSentences || []).length / Math.max((analysis.sentences || []).length, 1);
+        let level = 4;
+        if (longRatio > 0.5) level = 2;
+        else if (longRatio > 0.3) level = 3;
+        return { level, maxLevel: dim.maxLevel };
+      }
+
+      case 'vocabulary': {
+        const repeatCount = (analysis.repeatedWords || []).length;
+        const colloqCount = (analysis.colloquialWords || []).length;
+        let level = 4;
+        if (repeatCount > 3 || colloqCount > 3) level = 2;
+        else if (repeatCount > 1 || colloqCount > 1) level = 3;
+        return { level, maxLevel: dim.maxLevel };
+      }
+
+      case 'typos':
+      case 'mechanics': {
+        const typoCount = (analysis.typos || []).length;
+        let level = 3;
+        if (typoCount > 5) level = 1;
+        else if (typoCount > 2) level = 2;
+        return { level, maxLevel: dim.maxLevel };
+      }
+
+      case 'punctuation': {
+        const punct = analysis.punctuation || {};
+        return { level: punct.score || 3, maxLevel: dim.maxLevel };
+      }
+
+      case 'material': {
+        // 取材由 AI 判斷，本地依字數估算
+        let level = 3;
+        if (totalChars > 200) level = 5;
+        else if (totalChars > 120) level = 4;
+        else if (totalChars > 60) level = 3;
+        else level = 2;
+        return { level, maxLevel: dim.maxLevel };
+      }
+
+      default:
+        return { level: Math.ceil(dim.maxLevel / 2), maxLevel: dim.maxLevel };
+    }
+  },
+};
+
+// ======================================================================
+// DeepSeek API 模組
+// ======================================================================
+
+const deepseekAPI = {
+  buildPrompt(text, standard) {
+    const dimDescs = standard.dimensions.map(d =>
+      '  - ' + d.label + '（' + d.maxLevel + ' 級）：' + d.levels.join(' > ')
+    ).join('\n');
+
+    return `你是一位專業的小學中文寫作教練。你正在按照「${standard.name}」為香港小學生的作文評分及提供修改建議。
+
+你必須嚴格遵守以下規則：
+1. 絕不直接生成修改後的文章或完整句子。
+2. 所有回覆以「提問、選項比較、思維引導」的形式呈現。
+3. 必須先肯定學生做得好的地方，再提出改進建議。
+4. 回覆必須是嚴格的 JSON 格式，不包含任何其他文字。
+5. 不要使用「符合第X級標準」「達到X等級」等評分術語，
+   因為讀者是香港小學生，看不懂這些術語。
+   改用小學生能理解的語言給予回饋。
+   例如：不說「文句達到三等」，改說「你的句子大致通順，能清楚表達意思」。
+
+評分維度及等級描述（僅供你評分參考，勿將術語寫入回覆）：
+${dimDescs}
+
+請分析以下學生作文，返回 JSON：
+{
+  "scores": {
+    "dimensions": {
+      "${standard.dimensions[0].key}": { "level": 4, "comment": "用小學生能理解的簡短評語" },
+      ...
+    }
+  },
+  "praise": [
+    { "title": "簡短標題", "content": "具體正向回饋（小學生能理解的語言）" }
+  ],
+  "suggestions": [
+    { "category": "structure|writing|rhetoric|depth", "dimension": "對應的評分維度key",
+      "title": "簡短標題", "question": "以引導提問方式的修改建議", "original": "原文片段" }
+  ]
+}
+
+praise 至少 2 條，suggestions 至少 3 條。`;
+  },
+
+  async analyze(text, standard) {
+    if (!settings.useDeepseek || !settings.apiKey) return null;
+
+    const systemPrompt = this.buildPrompt(text, standard);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
+
+    try {
+      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + settings.apiKey },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: text }
+          ],
+          temperature: 0.7, max_tokens: 2000,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (!response.ok) throw new Error('API 回應錯誤 ' + response.status);
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content || '';
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) return JSON.parse(jsonMatch[0]);
+      return { praise: [], suggestions: [{ category: 'depth', title: 'AI 分析', question: content }] };
+    } catch (err) {
+      console.error('DeepSeek API error:', err);
+      return { error: err.message };
+    }
+  }
+};
+
+// ======================================================================
+// 建議卡片生成
+// ======================================================================
+
+function generateCards(analysis, apiResult) {
+  const praiseCards = [];
+  const suggestionCards = [];
+
+  // === 正向回饋 ===
+  if (apiResult?.praise) {
+    apiResult.praise.forEach(p => {
+      praiseCards.push({ type: 'praise', icon: '🌟', title: p.title, question: p.content });
+    });
+  }
+  // 本地正向回饋
+  if (analysis.structure?.strengths) {
+    analysis.structure.strengths.forEach(st => {
+      praiseCards.push({ type: 'praise', icon: '✅', title: '結構', question: st });
+    });
+  }
+  if (analysis.rhetoric?.detected?.length > 0) {
+    praiseCards.push({
+      type: 'praise', icon: '🎨', title: '修辭運用',
+      question: '你用了 ' + analysis.rhetoric.detected.length + ' 次比喻/擬人（' +
+        [...new Set(analysis.rhetoric.detected.map(d => d.keyword))].join('、') + '），讓文章更生動！',
+    });
+  }
+  if (praiseCards.length === 0) {
+    praiseCards.push({ type: 'praise', icon: '💪', title: '繼續努力', question: '你完成了這篇文章，這已經很棒了！讓我們一起看看可以怎麼把它變得更好。' });
+  }
+
+  // === 修改建議 ===
+  // 1. 錯別字
+  (analysis.typos || []).forEach(t => {
+    suggestionCards.push({
+      type: 'suggestion', category: 'typo', icon: '❌',
+      title: '錯別字：「' + t.word + '」',
+      question: '檢查到「' + t.word + '」，應該是「' + t.correct + '」嗎？請注意這兩個字的分別。',
+    });
+  });
+
+  // 2. 標點符號
+  if (analysis.punctuation?.issues?.length > 0) {
+    analysis.punctuation.issues.forEach(issue => {
+      suggestionCards.push({
+        type: 'suggestion', category: 'typo', icon: '🔤',
+        title: '標點符號',
+        question: issue + '。標點符號能幫助讀者清楚理解每個句子的意思。',
+      });
+    });
+  }
+
+  // 3. 粵語口語
+  (analysis.colloquialWords || []).forEach(c => {
+    const isParticle = c.suggestion.startsWith('(');
+    suggestionCards.push({
+      type: 'suggestion', category: 'colloquial', icon: '🗣️',
+      title: '口語詞：「' + c.word + '」',
+      question: isParticle
+        ? '「' + c.word + '」' + c.suggestion + '。寫作時可以省略語氣詞，讓句子更簡潔。'
+        : '「' + c.word + '」是廣東話口語，寫作時建議使用書面語「' + c.suggestion + '」。試試大聲讀一遍自己的文章，聽聽哪些詞語可以換成書面語？',
+    });
+  });
+
+  // 4. 結構問題
+  (analysis.structure?.issues || []).forEach(issue => {
+    suggestionCards.push({
+      type: 'suggestion', category: 'structure', icon: '📐',
+      title: issue.type === 'too_short' ? '文章長度' : issue.type === 'no_opening' ? '缺少開頭' : issue.type === 'no_ending' ? '缺少結尾' : '段落結構',
+      question: issue.message,
+    });
+  });
+
+  // 5. 過長句子
+  (analysis.longSentences || []).forEach(sen => {
+    suggestionCards.push({
+      type: 'suggestion', category: 'writing', icon: '📏',
+      title: '句子太長（' + sen.length + ' 字）',
+      question: '這句話有 ' + sen.length + ' 個字，讀起來會不會有點喘不過氣？試試在哪裡可以停頓一下，分成兩句？',
+      original: sen.text,
+    });
+  });
+
+  // 6. 重複詞語
+  (analysis.repeatedWords || []).forEach(r => {
+    suggestionCards.push({
+      type: 'suggestion', category: 'writing', icon: '🔄',
+      title: '詞語重複：「' + r.word + '」（' + r.count + ' 次）',
+      question: '「' + r.word + '」出現了 ' + r.count + ' 次。用不同的詞語表達同一個意思，文章會更豐富。',
+      references: r.synonyms,
+    });
+  });
+
+  // 7. 修辭
+  if (analysis.rhetoric) {
+    if (analysis.rhetoric.detected.length === 0) {
+      suggestionCards.push({
+        type: 'suggestion', category: 'rhetoric', icon: '💡',
+        title: '試試加入修辭',
+        question: '如果能在文章中加入一個比喻（用「像、彷彿」等詞），描寫會更生動。你會把什麼比作什麼？',
+      });
+    } else if (analysis.rhetoric.detected.length > 0) {
+      const first = analysis.rhetoric.detected[0];
+      suggestionCards.push({
+        type: 'suggestion', category: 'rhetoric', icon: '🎯',
+        title: '修辭挑戰',
+        question: '你的比喻「' + first.context.trim() + '」很棒！如果再加一個形容詞來描述，畫面會更美。你會加什麼？',
+      });
+    }
+    analysis.rhetoric.overusedParas.forEach(op => {
+      suggestionCards.push({
+        type: 'suggestion', category: 'rhetoric', icon: '⚠️',
+        title: '修辭密度過高',
+        question: '這一段用了 ' + op.count + ' 個比喻，有點太多了。哪一個比喻最能表達你的意思？保留最重要的一個，另外的可以刪掉或改成直接描寫。',
+      });
+    });
+  }
+
+  // 8. API 建議
+  if (apiResult?.suggestions) {
+    apiResult.suggestions.forEach(sug => {
+      const cat = sug.category || 'depth';
+      const iconMap = { structure: '📐', writing: '✒️', rhetoric: '🎨', depth: '💭' };
+      suggestionCards.push({
+        type: 'suggestion', category: cat, icon: iconMap[cat] || '💡',
+        title: sug.title, question: sug.question, original: sug.original || '',
+      });
+    });
+  }
+
+  return { praiseCards, suggestionCards };
+}
+
+// ======================================================================
+// UI 渲染
+// ======================================================================
+
+const ui = {
+  renderArticle(analysis, sentences) {
+    const container = document.getElementById('articleDisplay');
+    const text = document.getElementById('articleInput').value;
+    const sents = splitSentences(text);
+
+    // 收集問題索引
+    const issueMap = {};
+    const addIssue = (idx, type) => { if (!issueMap[idx]) issueMap[idx] = []; issueMap[idx].push(type); };
+
+    if (analysis) {
+      (analysis.typos || []).forEach(t => { sents.forEach((s, i) => { if (s.includes(t.word)) addIssue(i, 'typo'); }); });
+      (analysis.colloquialWords || []).forEach(c => { sents.forEach((s, i) => { if (s.includes(c.word)) addIssue(i, 'colloquial'); }); });
+      (analysis.longSentences || []).forEach(s => addIssue(s.index, 'long'));
+      (analysis.repeatedWords || []).forEach(r => { sents.forEach((s, i) => { if (s.includes(r.word)) addIssue(i, 'repeat'); }); });
+      (analysis.rhetoric?.detected || []).forEach(d => { sents.forEach((s, i) => { if (s.includes(d.keyword)) addIssue(i, 'rhetoric'); }); });
+    }
+
+    let html = '';
+    sents.forEach((s, i) => {
+      const issues = issueMap[i] || [];
+      let hlCls = '';
+      if (issues.includes('typo')) hlCls = 'hl-typo';
+      else if (issues.includes('colloquial')) hlCls = 'hl-colloquial';
+      else if (issues.includes('long')) hlCls = 'hl-long';
+      else if (issues.includes('repeat')) hlCls = 'hl-repeat';
+      else if (issues.includes('rhetoric')) hlCls = 'hl-rhetoric';
+      html += '<span class="sentence-wrap ' + hlCls + '">' + s + '</span>';
+    });
+    container.innerHTML = html;
+  },
+
+  renderGuidance(praiseCards, suggestionCards) {
+    const area = document.getElementById('guidanceArea');
+    let html = '';
+
+    // 正向回饋
+    if (praiseCards.length > 0) {
+      html += '<div class="guidance-section-title">🌟 寫得好的地方</div>';
+      praiseCards.forEach(c => { html += this.renderCard(c); });
+    }
+
+    // 修改建議
+    if (suggestionCards.length > 0) {
+      html += '<div class="guidance-section-title" style="margin-top:16px;">💡 可以更好的地方</div>';
+      suggestionCards.forEach(c => { html += this.renderCard(c); });
+    }
+
+    if (praiseCards.length === 0 && suggestionCards.length === 0) {
+      html += '<div class="empty-state"><p>未偵測到需要修改的地方。<br>你的文章寫得很好！</p></div>';
+    }
+
+    area.innerHTML = html;
+  },
+
+  renderCard(card) {
+    let cls = 'guidance-card';
+    if (card.type === 'praise') cls += ' praise';
+    else if (card.category) cls += ' ' + card.category;
+
+    let html = '<div class="' + cls + '">';
+    html += '<div class="gc-header">' + (card.icon || '💡') + ' ' + card.title + '</div>';
+    html += '<div class="gc-body">';
+    html += '<div class="gc-question">' + card.question + '</div>';
+    if (card.original) {
+      html += '<div class="gc-original">原文：' + card.original + '</div>';
+    }
+    if (card.references && card.references.length > 0) {
+      html += '<div class="gc-refs">📚 參考詞語：';
+      card.references.forEach(ref => {
+        html += '<span class="gc-ref-chip">' + ref + '</span>';
+      });
+      html += '</div>';
+    }
+    html += '</div></div>';
+    return html;
+  },
+
+  showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg; toast.style.display = 'block';
+    toast.style.animation = 'none'; toast.offsetHeight;
+    toast.style.animation = 'toastIn 0.3s ease, toastOut 0.3s ease 2.2s forwards';
+    setTimeout(() => { toast.style.display = 'none'; }, 2600);
+  },
+
+  setAIStatus(state, text) {
+    const indicator = document.getElementById('aiIndicator');
+    const dot = document.getElementById('aiDot');
+    const statusText = document.getElementById('aiStatusText');
+    indicator.style.display = 'flex';
+    dot.className = 'ai-dot ' + state;
+    statusText.textContent = text;
+  },
+
+  hideAIStatus() {
+    document.getElementById('aiIndicator').style.display = 'none';
+  },
+
+  // 等級常數
+  LEVEL_NAMES: ['一等', '二等', '三等', '四等', '五等'],
+  LEVEL_COLORS: ['#e53935','#ef6c00','#f9a825','#43a047','#2e7d32'],
+
+  renderScore(scoreData) {
+    if (!scoreData) return '';
+    const { dimensions, standard, standardKey } = scoreData;
+    const isSchool = standardKey === 'school';
+    const LV = this.LEVEL_NAMES;
+    const LC = this.LEVEL_COLORS;
+
+    // 計算加權分數
+    let totalW = 0, wSum = 0, maxPossible = 0;
+    dimensions.forEach(dim => {
+      const dimDef = standard.dimensions.find(d => d.key === dim.key);
+      const w = dimDef ? dimDef.weight : (100 / dimensions.length);
+      const maxLv = dimDef ? dimDef.maxLevel : dim.level;
+      wSum += (dim.level / maxLv) * w;
+      totalW += w;
+    });
+    const scorePercent = Math.round((wSum / totalW) * 100);
+
+    // 整體顯示（依標準不同）
+    let overallHtml = '';
+    if (isSchool) {
+      // 校內標準：100 分制
+      const barColor = scorePercent >= 85 ? '#2e7d32' : scorePercent >= 70 ? '#43a047' : scorePercent >= 55 ? '#f9a825' : scorePercent >= 40 ? '#ef6c00' : '#e53935';
+      overallHtml += '<div class="score-overall">';
+      overallHtml += '<div class="score-overall-label">總分：<strong style="color:' + barColor + '">' + scorePercent + '</strong><span style="font-weight:400;color:var(--text-lighter);"> / 100</span></div>';
+      overallHtml += '<div class="score-overall-bar-bg">';
+      overallHtml += '<div class="score-overall-bar-fill" style="width:' + scorePercent + '%;background:' + barColor + ';">';
+      overallHtml += '<span class="score-overall-text">' + scorePercent + ' 分</span>';
+      overallHtml += '</div></div></div>';
+    } else {
+      // TSA 標準：等級制
+      const overallLevel = Math.round((wSum / totalW) * 5);
+      const overallClamped = Math.max(1, Math.min(5, overallLevel));
+      const overallColor = LC[overallClamped - 1];
+      const overallPct = (overallClamped / 5) * 100;
+      overallHtml += '<div class="score-overall">';
+      overallHtml += '<div class="score-overall-label">整體評級：<strong style="color:' + overallColor + '">' + LV[overallClamped - 1] + '</strong></div>';
+      overallHtml += '<div class="score-overall-bar-bg">';
+      overallHtml += '<div class="score-overall-bar-fill" style="width:' + overallPct + '%;background:' + overallColor + ';">';
+      overallHtml += '<span class="score-overall-text">' + LV[overallClamped - 1] + '</span>';
+      overallHtml += '</div></div></div>';
+    }
+
+    let html = '<div class="score-card">';
+    html += '<div class="score-standard-badge">' + standard.icon + ' ' + standard.name + '</div>';
+    html += overallHtml;
+
+    // 各項細分（兩種標準都顯示等級 + 進度條）
+    html += '<div class="score-dim-section-title">各項細分</div>';
+    html += '<div class="score-dimensions">';
+
+    dimensions.forEach(dim => {
+      const dimDef = standard.dimensions.find(d => d.key === dim.key) || dim;
+      const pct = Math.round((dim.level / dimDef.maxLevel) * 100);
+      const color = LC[dim.level - 1] || '#999';
+      const levelName = LV[dim.level - 1] || (dim.level + '等');
+      const levelDesc = dimDef.levels ? dimDef.levels[dim.level - 1] : '';
+
+      html += '<div class="score-dim-row">';
+      html += '<div class="score-dim-header">';
+      html += '<span class="score-dim-label">' + dimDef.label + '</span>';
+      html += '<span class="score-dim-bar-bg"><span class="score-dim-bar-fill" style="width:' + pct + '%;background:' + color + ';"></span></span>';
+      html += '<span class="score-dim-grade" style="color:' + color + '">' + levelName + '</span>';
+      html += '</div>';
+      if (levelDesc) {
+        html += '<div class="score-dim-desc">' + levelDesc + '</div>';
+      }
+      html += '</div>';
+    });
+
+    html += '</div></div>';
+    return html;
+  },
+};
+
+// ======================================================================
+// 拍照掃描模組
+// ======================================================================
+
+const scanModule = {
+  stream: null, capturedImage: null, ocrWorker: null,
+
+  openModal(mode) {
+    document.getElementById('scanModal').style.display = 'flex';
+    this.switchMode(mode || 'camera');
+    this.resetPreview();
+  },
+  closeModal() { document.getElementById('scanModal').style.display = 'none'; this.stopCamera(); },
+
+  switchMode(mode) {
+    document.querySelectorAll('.scan-mode-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('[data-scanmode="' + mode + '"]').classList.add('active');
+    document.querySelectorAll('.scan-mode-panel').forEach(p => p.style.display = 'none');
+    document.getElementById('panel' + mode.charAt(0).toUpperCase() + mode.slice(1)).style.display = 'block';
+    if (mode !== 'camera') this.stopCamera();
+    if (mode === 'camera') this.startCamera();
+  },
+
+  async startCamera() {
+    const video = document.getElementById('cameraVideo');
+    const placeholder = document.getElementById('cameraPlaceholder');
+    if (this.stream) { video.style.display = 'block'; placeholder.style.display = 'none'; return; }
+    try {
+      this.stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false
+      });
+      video.srcObject = this.stream; video.style.display = 'block'; placeholder.style.display = 'none';
+      document.getElementById('btnStartCamera').style.display = 'none';
+      document.getElementById('btnCapture').style.display = 'inline-flex';
+    } catch {
+      placeholder.innerHTML = '<span class="cam-icon">🚫</span><span>無法存取相機<br><small>請確認權限，或使用「上傳圖片」模式</small></span>';
+    }
+  },
+
+  stopCamera() {
+    if (this.stream) { this.stream.getTracks().forEach(t => t.stop()); this.stream = null; }
+    const video = document.getElementById('cameraVideo');
+    video.srcObject = null; video.style.display = 'none';
+    document.getElementById('cameraPlaceholder').style.display = 'flex';
+    document.getElementById('btnStartCamera').style.display = 'inline-flex';
+    document.getElementById('btnCapture').style.display = 'none';
+  },
+
+  capturePhoto() {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.getElementById('cameraCanvas');
+    if (!video.srcObject) return;
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    document.getElementById('cameraFlash').classList.add('flash');
+    setTimeout(() => document.getElementById('cameraFlash').classList.remove('flash'), 150);
+    this.capturedImage = canvas.toDataURL('image/jpeg', 0.85);
+    this.showPreview(this.capturedImage);
+  },
+
+  handleFileUpload(file) {
+    if (!file || !file.type.startsWith('image/')) { ui.showToast('請選擇 JPG 或 PNG 圖片'); return; }
+    const reader = new FileReader();
+    reader.onload = e => { this.capturedImage = e.target.result; this.showPreview(this.capturedImage); };
+    reader.readAsDataURL(file);
+  },
+
+  showPreview(dataUrl) {
+    document.getElementById('previewImage').src = dataUrl;
+    document.getElementById('photoPreview').style.display = 'block';
+    document.getElementById('previewActions').style.display = 'flex';
+    document.querySelectorAll('.scan-mode-panel').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.scan-mode-tab').forEach(t => t.style.pointerEvents = 'none');
+    document.getElementById('btnStartCamera').style.display = 'none';
+    document.getElementById('btnCapture').style.display = 'none';
+  },
+
+  resetPreview() {
+    this.capturedImage = null;
+    document.getElementById('photoPreview').style.display = 'none';
+    document.getElementById('previewActions').style.display = 'none';
+    document.getElementById('ocrOverlay').style.display = 'none';
+    document.querySelectorAll('.scan-mode-tab').forEach(t => t.style.pointerEvents = 'auto');
+  },
+
+  async performOCR() {
+    if (!this.capturedImage) return;
+    if (typeof Tesseract === 'undefined') { ui.showToast('⚠️ OCR 引擎載入中，請稍後再試'); return; }
+
+    const overlay = document.getElementById('ocrOverlay');
+    const progFill = document.getElementById('ocrProgressFill');
+    const progText = document.getElementById('ocrProgressText');
+    overlay.style.display = 'flex'; progFill.style.width = '0%';
+    progText.textContent = '正在載入中文辨識引擎...';
+
+    try {
+      if (this.ocrWorker) await this.ocrWorker.terminate();
+      this.ocrWorker = await Tesseract.createWorker('chi_tra', 1, {
+        logger: m => {
+          if (m.status === 'recognizing text') { progFill.style.width = Math.round(m.progress * 100) + '%'; progText.textContent = '辨識中... ' + Math.round(m.progress * 100) + '%'; }
+          else if (m.status === 'loading language traineddata') { progText.textContent = '下載中文語言包（約10MB）...'; if (m.progress) progFill.style.width = Math.round(m.progress * 100) + '%'; }
+          else if (m.status === 'loading tesseract core') progText.textContent = '載入辨識引擎...';
+        }
+      });
+
+      const { data: { text } } = await this.ocrWorker.recognize(this.capturedImage);
+      const recognized = text.trim();
+      if (recognized) {
+        document.getElementById('articleInput').value = recognized;
+        document.getElementById('articleDisplayCard').style.display = 'block';
+        ui.renderArticle(null, []);
+        ui.showToast('✅ 已辨識 ' + recognized.length + ' 個字！請檢查並修正辨識結果');
+      } else {
+        ui.showToast('⚠️ 未辨識到文字，請確認圖片清晰度');
+      }
+      this.closeModal();
+    } catch (err) {
+      console.error('OCR error:', err);
+      ui.showToast('❌ OCR 辨識失敗，請改用「使用範例」或手動輸入');
+      overlay.style.display = 'none';
+    }
+  },
+};
+
+// ======================================================================
+// 主要流程
+// ======================================================================
+
+async function performAnalysis() {
+  const text = document.getElementById('articleInput').value.trim();
+  if (!text) { ui.showToast('請先輸入文章或拍照上傳作文'); return; }
+
+  const thresholds = getThresholds();
+  const standard = getScoringStandard();
+
+  // 顯示分析區域
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('scoreArea').style.display = 'block';
+  document.getElementById('guidanceArea').style.display = 'block';
+  document.getElementById('articleDisplayCard').style.display = 'block';
+
+  // 1. 本地規則引擎分析
+  const analysis = ruleEngine.analyze(text, thresholds);
+  ui.renderArticle(analysis);
+
+  // 2. 本地評分
+  const localScore = localScoring.score(analysis, settings.scoringStandard);
+
+  // 3. DeepSeek API（如果啟用）
+  let apiResult = null;
+  let finalScore = localScore;
+  if (settings.useDeepseek && settings.apiKey) {
+    ui.setAIStatus('loading', 'AI 深度分析及評分中...');
+    apiResult = await deepseekAPI.analyze(text, standard);
+    if (apiResult?.error) {
+      ui.setAIStatus('error', 'AI 分析暫時無法使用，顯示本地評分結果');
+    } else {
+      ui.setAIStatus('done', 'AI 深度分析完成');
+      // 合併評分：API 優先
+      if (apiResult?.scores) {
+        finalScore = mergeScores(localScore, apiResult.scores, standard, settings.scoringStandard);
+      }
+    }
+  } else {
+    ui.hideAIStatus();
+  }
+
+  // 4. 渲染評分
+  document.getElementById('scoreArea').innerHTML = ui.renderScore(finalScore);
+
+  // 5. 生成建議卡片
+  const { praiseCards, suggestionCards } = generateCards(analysis, apiResult);
+  ui.renderGuidance(praiseCards, suggestionCards);
+
+  // 滾動到右側
+  document.getElementById('rightPanel').scrollIntoView({ behavior: 'smooth' });
+  ui.showToast('分析完成！查看右側評分和修改建議');
+}
+
+// 合併本地評分和 API 評分（API 優先）
+function mergeScores(local, apiScores, standard, standardKey) {
+  const dimensions = [];
+  standard.dimensions.forEach(dim => {
+    const apiDim = apiScores.dimensions?.[dim.key];
+    const localDim = local.dimensions[dim.key];
+    if (apiDim && typeof apiDim.level === 'number') {
+      dimensions.push({ key: dim.key, level: apiDim.level, maxLevel: dim.maxLevel });
+    } else {
+      dimensions.push({ key: dim.key, level: localDim.level, maxLevel: dim.maxLevel });
+    }
+  });
+  return { dimensions, standard, standardKey };
+}
+
+// ======================================================================
+// 事件初始化
+// ======================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+  applySettingsToUI();
+
+  // --- 設定面板事件 ---
+  document.getElementById('gradePreset').addEventListener('change', function() {
+    settings.grade = this.value;
+    saveSettings(settings);
+    applySettingsToUI();
+  });
+
+  document.getElementById('scoringStandard').addEventListener('change', function() {
+    settings.scoringStandard = this.value;
+    saveSettings(settings);
+    updateStandardPreview();
+  });
+
+  document.getElementById('chkDeepseek').addEventListener('change', function() {
+    settings.useDeepseek = this.checked;
+    document.getElementById('apiKeyRow').style.display = this.checked ? 'flex' : 'none';
+    saveSettings(settings); updateApiStatus();
+  });
+
+  document.getElementById('btnSaveKey').addEventListener('click', () => {
+    settings.apiKey = document.getElementById('apiKeyInput').value.trim();
+    saveSettings(settings); updateApiStatus();
+    ui.showToast(settings.apiKey ? 'API Key 已儲存 ✓' : 'API Key 已清除');
+  });
+
+  // --- 按鈕事件 ---
+  document.getElementById('btnAnalyze').addEventListener('click', performAnalysis);
+  document.getElementById('btnScan').addEventListener('click', () => scanModule.openModal('camera'));
+  document.getElementById('btnUpload').addEventListener('click', () => scanModule.openModal('upload'));
+
+  document.getElementById('btnScanClose').addEventListener('click', () => scanModule.closeModal());
+  document.getElementById('scanModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('scanModal')) scanModule.closeModal();
+  });
+
+  document.querySelectorAll('.scan-mode-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const mode = tab.dataset.scanmode;
+      if (mode === 'sample') {
+        document.getElementById('articleInput').value = SAMPLE_ESSAY;
+        document.getElementById('articleDisplayCard').style.display = 'block';
+        ui.renderArticle(null, []);
+        ui.showToast('📄 已載入範例文章！');
+        scanModule.closeModal(); return;
+      }
+      scanModule.switchMode(mode);
+    });
+  });
+
+  document.getElementById('btnStartCamera').addEventListener('click', () => scanModule.startCamera());
+  document.getElementById('btnCapture').addEventListener('click', () => scanModule.capturePhoto());
+  document.getElementById('btnRetake').addEventListener('click', () => {
+    const mode = document.querySelector('.scan-mode-tab.active').dataset.scanmode;
+    scanModule.resetPreview(); scanModule.switchMode(mode);
+  });
+  document.getElementById('btnUsePhoto').addEventListener('click', () => scanModule.performOCR());
+
+  document.getElementById('uploadZone').addEventListener('click', () => document.getElementById('scanFileInput').click());
+  document.getElementById('scanFileInput').addEventListener('change', e => {
+    if (e.target.files[0]) scanModule.handleFileUpload(e.target.files[0]);
+  });
+
+  // 拖曳上傳
+  const uz = document.getElementById('uploadZone');
+  uz.addEventListener('dragover', e => { e.preventDefault(); uz.style.borderColor = 'var(--green-dark)'; uz.style.background = 'var(--green)'; });
+  uz.addEventListener('dragleave', () => { uz.style.borderColor = '#ccc'; uz.style.background = '#fafafa'; });
+  uz.addEventListener('drop', e => {
+    e.preventDefault(); uz.style.borderColor = '#ccc'; uz.style.background = '#fafafa';
+    if (e.dataTransfer.files[0]) scanModule.handleFileUpload(e.dataTransfer.files[0]);
+  });
+
+  // 即時預覽
+  document.getElementById('articleInput').addEventListener('input', function() {
+    const text = this.value;
+    if (text.trim()) {
+      document.getElementById('articleDisplayCard').style.display = 'block';
+      ui.renderArticle(null, []);
+    } else {
+      document.getElementById('articleDisplayCard').style.display = 'none';
+    }
+  });
+});
+</script>
+</body>
+</html>

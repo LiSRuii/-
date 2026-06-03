@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="zh-Hant-HK">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>走進李白的詩世界</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="回到首頁">
+        <span class="brand-mark">李</span>
+        <span>詩仙小旅程</span>
+      </a>
+      <nav class="nav" aria-label="主要內容">
+        <a href="#profile">認識李白</a>
+        <a href="#map">詩路地圖</a>
+        <a href="#poems">詩歌館</a>
+        <a href="#workshop">小詩人</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <img src="assets/li-bai-hero.png" alt="月夜江邊的李白插畫，有山水、明月和書卷" class="hero-image">
+        <div class="hero-content">
+          <p class="eyebrow">唐代詩人探索站</p>
+          <h1 id="hero-title">走進李白的詩世界</h1>
+          <p class="hero-copy">跟着月光、江水和想像，認識「詩仙」李白，讀懂他的山水、友情和思鄉。</p>
+          <div class="hero-actions" aria-label="開始探索">
+            <a href="#poems" class="primary-action">讀一首詩</a>
+            <a href="#workshop" class="secondary-action">寫一句詩</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="quick-stats" aria-label="李白小檔案">
+        <article>
+          <span class="stat-number">701</span>
+          <span class="stat-label">年出生</span>
+        </article>
+        <article>
+          <span class="stat-number">詩仙</span>
+          <span class="stat-label">後人對他的稱呼</span>
+        </article>
+        <article>
+          <span class="stat-number">月亮</span>
+          <span class="stat-label">常見詩歌意象</span>
+        </article>
+        <article>
+          <span class="stat-number">遠遊</span>
+          <span class="stat-label">他的生命關鍵詞</span>
+        </article>
+      </section>
+
+      <section class="section profile-section" id="profile" aria-labelledby="profile-title">
+        <div class="section-heading">
+          <p class="eyebrow">人物名片</p>
+          <h2 id="profile-title">李白是怎樣的人？</h2>
+        </div>
+        <div class="profile-grid">
+          <article class="profile-card large image-card">
+            <img src="assets/li-bai-imagination.png" alt="李白在月夜山水前看瀑布，旁邊有書卷和毛筆" class="profile-illustration">
+            <div class="profile-copy">
+              <h3>豪放又愛想像</h3>
+              <p>李白的詩常把眼前景物寫得很有氣勢，例如瀑布像從天上落下來，月光像地上的霜。他善於用誇張和想像，把感情寫得鮮明。</p>
+            </div>
+          </article>
+          <article class="profile-card">
+            <h3>喜歡遠遊</h3>
+            <p>他一生到過很多地方，山川江河成為詩中的重要景物。</p>
+          </article>
+          <article class="profile-card">
+            <h3>重視友情</h3>
+            <p>他寫過送別和贈友的詩，讓我們看見古人表達情誼的方法。</p>
+          </article>
+          <article class="profile-card">
+            <h3>情感真切</h3>
+            <p>看見月亮時，他會想到家鄉；遇到美景時，他會把驚喜寫進詩裏。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section map-section" id="map" aria-labelledby="map-title">
+        <div class="section-heading">
+          <p class="eyebrow">詩路地圖</p>
+          <h2 id="map-title">從地點讀懂詩</h2>
+        </div>
+        <div class="journey-layout">
+          <div class="map-column">
+            <div class="map-panel" aria-label="唐代李白詩路示意地圖">
+              <svg class="tang-map" viewBox="0 0 760 470" role="img" aria-labelledby="tang-map-title tang-map-desc">
+                <title id="tang-map-title">唐代李白詩路示意圖</title>
+                <desc id="tang-map-desc">地圖標出唐代長安、蜀地、白帝城、廬山、江陵，以及黃河和長江的位置，幫助學生理解李白詩歌背景。</desc>
+                <defs>
+                  <linearGradient id="landGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#f2dfb9"></stop>
+                    <stop offset="56%" stop-color="#d9e3bf"></stop>
+                    <stop offset="100%" stop-color="#bdd7c7"></stop>
+                  </linearGradient>
+                  <linearGradient id="waterGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#3c8fbd"></stop>
+                    <stop offset="100%" stop-color="#6cb8bf"></stop>
+                  </linearGradient>
+                </defs>
+                <rect class="map-sea" width="760" height="470" rx="8"></rect>
+                <path class="map-land" d="M92 89 C169 34 295 37 376 66 C451 92 500 50 587 83 C672 116 722 183 704 261 C686 342 589 387 474 390 C363 394 310 434 207 401 C98 366 43 289 47 204 C50 156 58 116 92 89 Z"></path>
+                <path class="map-border" d="M112 108 C190 68 279 65 352 91 C432 119 496 84 574 111 C642 135 682 191 670 253 C654 327 556 359 469 360 C371 360 306 407 217 373 C126 337 78 277 82 207 C85 163 86 132 112 108 Z"></path>
+                <path class="map-river-line yellow-river" d="M270 154 C330 129 392 132 444 164 C496 195 539 197 589 172" aria-label="黃河"></path>
+                <path class="map-river-line yangtze-river" d="M181 309 C248 274 322 280 390 305 C462 332 544 331 623 294" aria-label="長江"></path>
+                <path class="map-route" d="M212 294 C276 248 337 218 408 174 C454 212 464 264 421 318 C493 315 548 304 594 283"></path>
+                <g class="map-city-labels">
+                  <text x="390" y="159">長安</text>
+                  <text x="172" y="286">蜀地</text>
+                  <text x="372" y="338">白帝城</text>
+                  <text x="594" y="272">廬山</text>
+                  <text x="509" y="316">江陵</text>
+                  <text x="512" y="142" class="river-label">黃河</text>
+                  <text x="308" y="339" class="river-label">長江</text>
+                </g>
+              </svg>
+              <button class="place-pin place-trigger active" type="button" data-place="sichuan" style="--x: 28%; --y: 63%;" aria-label="蜀地">
+                <span class="pin-dot" aria-hidden="true"></span>
+                <span>蜀地</span>
+              </button>
+              <button class="place-pin place-trigger" type="button" data-place="changan" style="--x: 53%; --y: 37%;" aria-label="長安">
+                <span class="pin-dot" aria-hidden="true"></span>
+                <span>長安</span>
+              </button>
+              <button class="place-pin place-trigger" type="button" data-place="lushan" style="--x: 78%; --y: 58%;" aria-label="廬山">
+                <span class="pin-dot" aria-hidden="true"></span>
+                <span>廬山</span>
+              </button>
+              <button class="place-pin place-trigger" type="button" data-place="baidi" style="--x: 49%; --y: 71%;" aria-label="白帝城">
+                <span class="pin-dot" aria-hidden="true"></span>
+                <span>白帝城</span>
+              </button>
+              <div class="map-era">
+                <strong>唐代（約8世紀）</strong>
+                <span>李白詩路示意圖</span>
+              </div>
+              <p class="map-note">地點位置為教學示意，幫助理解詩歌背景。</p>
+            </div>
+            <div class="map-controls" aria-label="選擇詩路地點">
+              <button class="map-control place-trigger active" type="button" data-place="sichuan">蜀地</button>
+              <button class="map-control place-trigger" type="button" data-place="changan">長安</button>
+              <button class="map-control place-trigger" type="button" data-place="baidi">白帝城</button>
+              <button class="map-control place-trigger" type="button" data-place="lushan">廬山</button>
+            </div>
+          </div>
+          <article class="place-card" aria-live="polite">
+            <p class="card-kicker">蜀地（今四川一帶）</p>
+            <h3>少年時期的起點</h3>
+            <p>李白少年時在蜀地生活。這一帶山多水長，壯闊的自然環境，成為他日後遠遊和寫詩的重要背景。</p>
+            <p class="thinking">想一想：地圖上的山川，會怎樣影響一個詩人的想像？</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section poem-section" id="poems" aria-labelledby="poems-title">
+        <div class="section-heading">
+          <p class="eyebrow">詩歌互動館</p>
+          <h2 id="poems-title">一首詩，三種讀法</h2>
+        </div>
+        <div class="poem-tabs" role="tablist" aria-label="選擇李白詩作">
+          <button class="tab-button active" type="button" role="tab" aria-selected="true" data-poem="night">靜夜思</button>
+          <button class="tab-button" type="button" role="tab" aria-selected="false" data-poem="waterfall">望廬山瀑布</button>
+          <button class="tab-button" type="button" role="tab" aria-selected="false" data-poem="friend">贈汪倫</button>
+          <button class="tab-button" type="button" role="tab" aria-selected="false" data-poem="baidi">早發白帝城</button>
+        </div>
+        <div class="poem-reader">
+          <article class="poem-card">
+            <div>
+              <p class="card-kicker">思鄉</p>
+              <h3>靜夜思</h3>
+            </div>
+            <p class="poem-lines">床前明月光，疑是地上霜。<br>舉頭望明月，低頭思故鄉。</p>
+          </article>
+          <aside class="poem-notes">
+            <h3>讀懂詩句</h3>
+            <dl>
+              <div>
+                <dt>畫面</dt>
+                <dd>夜裏看見月光，好像地上鋪了一層霜。</dd>
+              </div>
+              <div>
+                <dt>感情</dt>
+                <dd>詩人由月亮想到家鄉，表達思念之情。</dd>
+              </div>
+              <div>
+                <dt>語文焦點</dt>
+                <dd>留意「舉頭」和「低頭」的動作變化。</dd>
+              </div>
+            </dl>
+            <button class="stamp-button" type="button" data-stamp="moon">收集月亮章</button>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section stamp-section" aria-labelledby="stamp-title">
+        <div class="section-heading">
+          <p class="eyebrow">學習任務</p>
+          <h2 id="stamp-title">我的詩仙印章</h2>
+        </div>
+        <div class="stamp-row" aria-live="polite">
+          <span class="stamp empty" data-stamp-slot="moon">月</span>
+          <span class="stamp empty" data-stamp-slot="mountain">山</span>
+          <span class="stamp empty" data-stamp-slot="friend">友</span>
+          <span class="stamp empty" data-stamp-slot="imagine">想</span>
+        </div>
+      </section>
+
+      <section class="section workshop-section" id="workshop" aria-labelledby="workshop-title">
+        <div class="section-heading">
+          <p class="eyebrow">做個小詩人</p>
+          <h2 id="workshop-title">用李白的方式寫一句</h2>
+        </div>
+        <div class="workshop-grid">
+          <form class="poem-builder">
+            <label>
+              我看見
+              <select id="scene-word">
+                <option>明月</option>
+                <option>瀑布</option>
+                <option>江水</option>
+                <option>高山</option>
+              </select>
+            </label>
+            <label>
+              它像
+              <select id="image-word">
+                <option>銀白的霜</option>
+                <option>天上的河</option>
+                <option>會發光的絲帶</option>
+                <option>遠方的朋友</option>
+              </select>
+            </label>
+            <label>
+              我想到
+              <select id="feeling-word">
+                <option>故鄉</option>
+                <option>朋友</option>
+                <option>一次遠行</option>
+                <option>心中的夢想</option>
+              </select>
+            </label>
+          </form>
+          <article class="student-poem" aria-live="polite">
+            <p class="card-kicker">我的詩句</p>
+            <p id="student-line">明月像銀白的霜，使我想到故鄉。</p>
+            <button class="stamp-button" type="button" data-stamp="imagine">收集想像章</button>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>香港小學中文學習網站原型：人物、古詩、文學欣賞與創意寫作</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
