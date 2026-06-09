@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 170" width="512" height="512">
+  <rect width="200" height="170" fill="#F5E6D3"/>
+  <line x1="50" y1="30" x2="45" y2="140" stroke="#6B6B6B" stroke-width="4" stroke-linecap="round"/>
+  <path d="M50,30 L120,40 L120,62 L50,52" fill="none" stroke="#6B6B6B" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="82" cy="42" r="14" fill="#C8484B" opacity="0.2"/>
+  <circle cx="82" cy="42" r="14" fill="none" stroke="#C8484B" stroke-width="3" stroke-dasharray="3 3"/>
+  <circle cx="82" cy="42" r="6" fill="#C8484B"/>
+  <text x="12" y="46" font-size="13" fill="#C8484B" font-family="sans-serif">刀刃→</text>
+</svg>

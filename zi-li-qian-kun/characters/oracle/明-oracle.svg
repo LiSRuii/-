@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">
+  <rect width="100" height="100" fill="#F5E6D3"/>
+  <circle cx='30' cy='40' r='18' fill='none' stroke='#8B0000' stroke-width='3'/><line x1='30' y1='22' x2='30' y2='18' stroke='#8B0000' stroke-width='2'/><line x1='30' y1='58' x2='30' y2='62' stroke='#8B0000' stroke-width='2'/><line x1='12' y1='40' x2='8' y2='40' stroke='#8B0000' stroke-width='2'/><line x1='48' y1='40' x2='52' y2='40' stroke='#8B0000' stroke-width='2'/><path d='M70,28 Q82,40 70,52 Q58,40 70,28 Z' fill='none' stroke='#8B0000' stroke-width='3'/>
+</svg>

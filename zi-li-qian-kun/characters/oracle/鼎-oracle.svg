@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">
+  <rect width="100" height="100" fill="#F5E6D3"/>
+  <path d='M30,20 L35,12 L65,12 L70,20' fill='none' stroke='#8B0000' stroke-width='2.5' stroke-linejoin='round'/><path d='M25,20 L25,50 Q25,55 30,55 L70,55 Q75,55 75,50 L75,20' fill='none' stroke='#8B0000' stroke-width='3'/><line x1='35' y1='55' x2='30' y2='85' stroke='#8B0000' stroke-width='3' stroke-linecap='round'/><line x1='65' y1='55' x2='70' y2='85' stroke='#8B0000' stroke-width='3' stroke-linecap='round'/><line x1='50' y1='55' x2='50' y2='82' stroke='#8B0000' stroke-width='3' stroke-linecap='round'/>
+</svg>
