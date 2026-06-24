@@ -1,0 +1,3897 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>部件煉字爐 — 拆字煉字，認識漢字之美</title>
+<style>
+/* ============================================================
+   CSS 變數系統
+   ============================================================ */
+:root {
+  --paper-cream: #F5EBD8;
+  --paper-dark: #E8DCC8;
+  --paper-darker: #D4C8A8;
+  --ink-black: #2C2416;
+  --ink-light: #4A3F2E;
+  --cinnabar-red: #C8423D;
+  --cinnabar-dark: #A3302B;
+  --bamboo-green: #6B8E4E;
+  --bamboo-light: #8AB86A;
+  --tea-gold: #D4A82C;
+  --tea-gold-light: #E8C44A;
+  --blue-porcelain: #3A6B8C;
+  --forge-orange: #E8743C;
+  --forge-orange-bright: #FF9A5C;
+  --forge-orange-dark: #C55A2A;
+  --flame-yellow: #FFD54F;
+  --white: #FFFDF7;
+  --shadow-light: rgba(44,36,22,0.08);
+  --shadow-medium: rgba(44,36,22,0.15);
+  --shadow-heavy: rgba(44,36,22,0.25);
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --font-brush: '標楷體','DFKai-SB','KaiTi','STKaiti','TW-Kai',serif;
+  --font-body: '思源黑體','Noto Sans TC','微軟正黑體','Microsoft JhengHei','PingFang TC',sans-serif;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.6s ease;
+}
+
+/* ============================================================
+   全域 Reset & 基礎
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--paper-cream);
+  color: var(--ink-black);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 宣紙紋理背景 */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    /* 底層米白 */
+    linear-gradient(180deg, #F5EBD8 0%, #F0E4CC 30%, #F3E9D4 60%, #F5EBD8 100%),
+    /* 紙張纖維紋理 */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(180,160,120,0.03) 2px,
+      rgba(180,160,120,0.03) 4px
+    ),
+    /* 泛黃斑點 */
+    radial-gradient(ellipse at 15% 20%, rgba(180,150,100,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 60%, rgba(160,130,80,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 40% 80%, rgba(170,140,90,0.05) 0%, transparent 40%),
+    radial-gradient(circle at 60% 15%, rgba(180,150,100,0.04) 0%, transparent 30%),
+    /* 細微噪點 */
+    url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-size: 100% 100%, 100% 8px, 100% 100%, 100% 100%, 100% 100%, 100% 100%, 200px 200px;
+}
+
+/* ============================================================
+   共用 Class
+   ============================================================ */
+.paper-card {
+  background: linear-gradient(180deg, #FFFDF7 0%, #F9F1E0 100%);
+  border: 1px solid rgba(180,160,120,0.3);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  box-shadow: 0 2px 12px var(--shadow-light), 0 1px 3px var(--shadow-medium);
+  position: relative;
+}
+
+.paper-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 10% 10%, rgba(180,160,120,0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at 90% 90%, rgba(180,160,120,0.06) 0%, transparent 50%);
+}
+
+.ink-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-brush);
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--white);
+  background: var(--cinnabar-red);
+  border: 2px solid var(--cinnabar-dark);
+  border-radius: var(--radius-md);
+  padding: 14px 32px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-normal);
+  box-shadow: 0 4px 12px rgba(200,66,61,0.3);
+  min-height: 48px;
+  min-width: 48px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ink-button:hover {
+  background: var(--cinnabar-dark);
+  transform: translateY(-2px) rotate(-1deg);
+  box-shadow: 0 6px 20px rgba(200,66,61,0.4);
+}
+
+.ink-button:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 2px 6px rgba(200,66,61,0.3);
+  transition: all 0.1s ease;
+}
+
+/* 印章效果 */
+.seal-stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-brush);
+  color: var(--cinnabar-red);
+  border: 3px solid var(--cinnabar-red);
+  border-radius: var(--radius-sm);
+  padding: 8px 18px;
+  position: relative;
+  transform: rotate(-3deg);
+  box-shadow:
+    inset 0 0 0 2px var(--paper-cream),
+    inset 0 0 0 3px var(--cinnabar-red);
+}
+
+.brush-title {
+  font-family: var(--font-brush);
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-shadow: 1px 1px 2px rgba(44,36,22,0.15);
+}
+
+.child-friendly {
+  border-radius: var(--radius-md);
+  font-size: 1.1rem;
+  min-height: 48px;
+  min-width: 48px;
+}
+
+.flame-border {
+  position: relative;
+}
+
+.flame-border::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  padding: 4px;
+  background: linear-gradient(180deg, var(--forge-orange), var(--flame-yellow), var(--forge-orange));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: flameBorderPulse 2s ease-in-out infinite;
+}
+
+/* ============================================================
+   佈局容器
+   ============================================================ */
+.app-container {
+  position: relative;
+  z-index: 1;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.screen {
+  display: none;
+  animation: fadeIn 0.4s ease;
+}
+
+.screen.active {
+  display: block;
+}
+
+body:has(#screen-game.active) .lantern-container {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   雲紋 + 燈籠裝飾
+   ============================================================ */
+.cloud-pattern {
+  width: 100%;
+  height: 40px;
+  overflow: hidden;
+  opacity: 0.25;
+}
+
+.cloud-pattern svg {
+  width: 100%;
+  height: 100%;
+}
+
+.lantern-container {
+  position: fixed;
+  top: 16px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.lantern-container.left  { left: 16px; }
+.lantern-container.right { right: 16px; }
+
+.lantern {
+  width: 40px;
+  height: 56px;
+  animation: lanternSway 5s ease-in-out infinite;
+  transform-origin: top center;
+  filter: drop-shadow(0 0 8px rgba(200,66,61,0.3));
+}
+
+.lantern-container.right .lantern {
+  animation-delay: -2.5s;
+}
+
+@keyframes lanternSway {
+  0%, 100% { transform: rotate(-5deg); }
+  50%      { transform: rotate(5deg); }
+}
+
+@media (max-width: 600px) {
+  .lantern { width: 28px; height: 42px; }
+  .lantern-container.left  { left: 4px; }
+  .lantern-container.right { right: 4px; }
+}
+
+/* ============================================================
+   首頁
+   ============================================================ */
+.home-header {
+  text-align: center;
+  padding: 20px 0 10px;
+}
+
+.home-title {
+  font-size: 3rem;
+  color: var(--cinnabar-red);
+  margin-bottom: 4px;
+}
+
+.home-subtitle {
+  font-size: 1.15rem;
+  color: var(--ink-black);
+  font-family: var(--font-brush);
+  opacity: 0.8;
+}
+
+.brush-divider {
+  width: 200px;
+  height: 20px;
+  margin: 12px auto;
+  opacity: 0.4;
+}
+
+/* 煉字爐視覺 */
+.forge-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+  position: relative;
+  height: 320px;
+}
+
+.forge-svg {
+  width: 220px;
+  height: 280px;
+  position: relative;
+  z-index: 2;
+}
+
+/* 火焰動畫 */
+.flame-layer {
+  animation: flicker 0.8s ease-in-out infinite alternate;
+  transform-origin: center bottom;
+}
+
+.flame-layer:nth-child(2) {
+  animation-duration: 0.6s;
+  animation-delay: -0.2s;
+}
+
+.flame-layer:nth-child(3) {
+  animation-duration: 1s;
+  animation-delay: -0.4s;
+}
+
+@keyframes flicker {
+  0%   { transform: scaleY(1) scaleX(1); opacity: 0.9; }
+  25%  { transform: scaleY(1.08) scaleX(0.95); opacity: 1; }
+  50%  { transform: scaleY(0.95) scaleX(1.05); opacity: 0.85; }
+  75%  { transform: scaleY(1.1) scaleX(0.92); opacity: 1; }
+  100% { transform: scaleY(1.02) scaleX(1.02); opacity: 0.9; }
+}
+
+/* 部件投入路徑 */
+.part-stream {
+  position: absolute;
+  width: 520px;
+  height: 210px;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.stream-track {
+  position: absolute;
+  inset: 20px 42px 48px;
+  border-top: 2px dashed rgba(74,63,46,0.22);
+  border-radius: 50% 50% 0 0;
+  transform: translateY(20px);
+}
+
+.stream-track::before,
+.stream-track::after {
+  content: '';
+  position: absolute;
+  bottom: -52px;
+  width: 120px;
+  height: 88px;
+  border-bottom: 2px dashed rgba(200,66,61,0.24);
+  border-radius: 0 0 50% 50%;
+}
+
+.stream-track::before {
+  left: 54px;
+  transform: rotate(-18deg);
+}
+
+.stream-track::after {
+  right: 54px;
+  transform: rotate(18deg);
+}
+
+.stream-part {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-brush);
+  font-size: 1.5rem;
+  color: var(--ink-black);
+  background: rgba(255,253,247,0.92);
+  border: 1.5px solid rgba(74,63,46,0.72);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--shadow-light);
+  animation: streamFloat 3.2s ease-in-out infinite;
+}
+
+.part-left-top {
+  top: 22px;
+  left: 82px;
+  transform: rotate(-7deg);
+}
+
+.part-left-mid {
+  top: 116px;
+  left: 28px;
+  transform: rotate(4deg);
+  animation-delay: -0.8s;
+}
+
+.part-right-top {
+  top: 22px;
+  right: 82px;
+  transform: rotate(7deg);
+  animation-delay: -1.6s;
+}
+
+.part-right-mid {
+  top: 116px;
+  right: 28px;
+  transform: rotate(-4deg);
+  animation-delay: -2.4s;
+}
+
+@keyframes streamFloat {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -8px; }
+}
+
+/* 介紹卡片 */
+.intro-section {
+  margin: 20px 0;
+}
+
+.intro-section .paper-card {
+  text-align: center;
+}
+
+.intro-section h3 {
+  font-family: var(--font-brush);
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+  color: var(--ink-black);
+}
+
+.intro-section p {
+  font-size: 1rem;
+  color: var(--ink-light);
+  max-width: 500px;
+  margin: 0 auto 16px;
+}
+
+.feature-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.feature-card {
+  text-align: center;
+  padding: 16px 12px;
+  background: rgba(255,253,247,0.6);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(180,160,120,0.2);
+}
+
+.feature-card .icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.feature-card h4 {
+  font-family: var(--font-brush);
+  font-size: 1rem;
+  color: var(--ink-black);
+  margin-bottom: 4px;
+}
+
+.feature-card p {
+  font-size: 0.85rem;
+  color: var(--ink-light);
+  margin: 0;
+}
+
+/* 名稱輸入 */
+.name-section {
+  margin: 24px 0;
+  text-align: center;
+}
+
+.name-section label {
+  display: block;
+  font-family: var(--font-brush);
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  color: var(--ink-black);
+}
+
+.name-input {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  padding: 12px 20px;
+  border: 2px solid var(--paper-darker);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  color: var(--ink-black);
+  text-align: center;
+  width: 100%;
+  max-width: 260px;
+  transition: border-color var(--transition-normal);
+  outline: none;
+}
+
+.name-input:focus {
+  border-color: var(--cinnabar-red);
+  box-shadow: 0 0 0 3px rgba(200,66,61,0.1);
+}
+
+/* 開始按鈕 */
+.start-section {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.start-button {
+  font-size: 1.5rem;
+  padding: 18px 48px;
+  animation: breathePulse 2.5s ease-in-out infinite;
+}
+
+@keyframes breathePulse {
+  0%, 100% { box-shadow: 0 4px 12px rgba(200,66,61,0.3); }
+  50%      { box-shadow: 0 6px 28px rgba(200,66,61,0.55), 0 0 0 8px rgba(200,66,61,0.08); }
+}
+
+/* 規則區 */
+.rules-section {
+  margin: 20px 0;
+}
+
+.rules-toggle {
+  width: 100%;
+  font-family: var(--font-brush);
+  font-size: 1.15rem;
+  color: var(--ink-black);
+  background: transparent;
+  border: 1px solid var(--paper-darker);
+  border-radius: var(--radius-md);
+  padding: 14px 20px;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition-normal);
+  min-height: 48px;
+}
+
+.rules-toggle:hover {
+  background: rgba(180,160,120,0.1);
+}
+
+.rules-toggle::after {
+  content: ' ▾';
+  float: right;
+  transition: transform var(--transition-normal);
+}
+
+.rules-toggle.open::after {
+  transform: rotate(180deg);
+}
+
+.rules-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease, padding 0.5s ease;
+  background: rgba(255,253,247,0.5);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.rules-content[hidden] {
+  display: none;
+}
+
+.rules-content.open {
+  max-height: 400px;
+  padding: 16px 20px;
+  border: 1px solid var(--paper-darker);
+  border-top: none;
+}
+
+.rules-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.rules-content li {
+  padding: 6px 0;
+  padding-left: 24px;
+  position: relative;
+  font-size: 0.95rem;
+}
+
+.rules-content li::before {
+  content: '◆';
+  position: absolute;
+  left: 0;
+  color: var(--cinnabar-red);
+  font-size: 0.6rem;
+  top: 12px;
+}
+
+/* 歷史成績 */
+.scores-section {
+  margin: 20px 0;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.score-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-brush);
+  font-size: 1.05rem;
+  padding: 10px 20px;
+  background: rgba(255,253,247,0.7);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--paper-darker);
+}
+
+.score-badge .highlight {
+  color: var(--cinnabar-red);
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+/* 設定列 */
+.settings-bar {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 20;
+  display: flex;
+  gap: 8px;
+}
+
+.settings-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--paper-darker);
+  background: rgba(255,253,247,0.85);
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-normal);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.settings-btn:hover {
+  background: var(--white);
+  box-shadow: 0 2px 8px var(--shadow-medium);
+}
+
+.settings-btn.sound-off {
+  opacity: 0.5;
+}
+
+/* 成就 Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(44,36,22,0.5);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.modal-overlay.open {
+  display: flex;
+}
+
+.modal {
+  background: var(--white);
+  border: 2px solid var(--paper-darker);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  max-width: 400px;
+  width: 90%;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 40px var(--shadow-heavy);
+  animation: modalIn 0.3s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.9) translateY(20px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal h3 {
+  font-family: var(--font-brush);
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  text-align: center;
+  flex: 0 0 auto;
+}
+
+.modal-body {
+  min-height: 0;
+  max-height: min(54vh, 520px);
+  overflow-y: auto;
+  padding-right: 4px;
+  overscroll-behavior: contain;
+}
+
+.modal .achievement-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-bottom: 1px solid var(--paper-darker);
+}
+
+.modal .achievement-item.locked {
+  opacity: 0.4;
+}
+
+.modal .achievement-icon {
+  font-size: 1.8rem;
+}
+
+.modal .achievement-info h4 {
+  font-family: var(--font-brush);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.modal .achievement-info p {
+  font-size: 0.8rem;
+  color: var(--ink-light);
+  margin: 2px 0 0;
+}
+
+.modal-close {
+  display: block;
+  flex: 0 0 auto;
+  margin: 16px auto 0;
+  font-family: var(--font-brush);
+  font-size: 1rem;
+  color: var(--white);
+  background: var(--ink-black);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 28px;
+  cursor: pointer;
+  min-height: 44px;
+  transition: background var(--transition-normal);
+}
+
+.modal-close:hover {
+  background: var(--ink-light);
+}
+
+/* 底部 */
+.home-footer {
+  text-align: center;
+  padding: 20px 0;
+  color: var(--ink-light);
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.home-footer .tag {
+  display: inline-block;
+  background: rgba(200,66,61,0.1);
+  color: var(--cinnabar-red);
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-family: var(--font-brush);
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   遊戲與結算畫面 (佔位)
+   ============================================================ */
+.placeholder-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.placeholder-screen h2 {
+  font-family: var(--font-brush);
+  font-size: 2rem;
+  color: var(--ink-light);
+  margin-bottom: 12px;
+}
+
+.placeholder-screen p {
+  font-size: 1.1rem;
+  color: var(--ink-light);
+  opacity: 0.7;
+}
+
+.back-home-btn {
+  margin-top: 20px;
+  font-family: var(--font-brush);
+  font-size: 1rem;
+  color: var(--white);
+  background: var(--ink-black);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 28px;
+  cursor: pointer;
+  min-height: 48px;
+  transition: background var(--transition-normal);
+}
+
+.back-home-btn:hover {
+  background: var(--ink-light);
+}
+
+/* ============================================================
+   stagger 載入動畫
+   ============================================================ */
+.stagger-item {
+  opacity: 0;
+  animation: staggerFadeIn 0.5s ease forwards;
+}
+
+@keyframes staggerFadeIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   無障礙 focus 樣式
+   ============================================================ */
+:focus-visible {
+  outline: 3px solid var(--blue-porcelain);
+  outline-offset: 3px;
+}
+
+/* ============================================================
+   RWD
+   ============================================================ */
+@media (max-width: 768px) {
+  .home-title {
+    font-size: 2.2rem;
+  }
+
+  .home-subtitle {
+    font-size: 1rem;
+  }
+
+  .feature-cards {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .forge-visual {
+    height: 260px;
+  }
+
+  .forge-svg {
+    width: 160px;
+    height: 210px;
+  }
+
+  .part-stream {
+    width: 360px;
+    height: 176px;
+    top: 4px;
+  }
+
+  .stream-track {
+    inset: 18px 38px 44px;
+  }
+
+  .stream-track::before,
+  .stream-track::after {
+    width: 86px;
+    height: 68px;
+    bottom: -42px;
+  }
+
+  .stream-track::before { left: 34px; }
+  .stream-track::after { right: 34px; }
+
+  .stream-part {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+
+  .part-left-top { top: 18px; left: 52px; }
+  .part-left-mid { top: 96px; left: 18px; }
+  .part-right-top { top: 18px; right: 52px; }
+  .part-right-mid { top: 96px; right: 18px; }
+
+  .settings-bar {
+    top: 10px;
+    right: 10px;
+  }
+
+  .lantern-container.left  { left: 2px; }
+  .lantern-container.right { right: 2px; }
+}
+
+@media (max-width: 980px) {
+  #screen-game .game-status-bar {
+    padding-right: 106px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-container {
+    padding: 12px;
+  }
+
+  .home-title {
+    font-size: 1.8rem;
+  }
+
+  .home-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .forge-visual {
+    height: 220px;
+  }
+
+  .forge-svg {
+    width: 130px;
+    height: 170px;
+  }
+
+  .part-stream {
+    width: 190px;
+    height: 122px;
+    top: 16px;
+  }
+
+  .stream-track {
+    inset: 12px 26px 30px;
+  }
+
+  .stream-track::before,
+  .stream-track::after {
+    display: none;
+  }
+
+  .stream-part {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+  }
+
+  .part-left-top { top: 8px; left: 0; }
+  .part-left-mid { top: 70px; left: 18px; }
+  .part-right-top { top: 8px; right: 0; }
+  .part-right-mid { top: 70px; right: 18px; }
+
+  .ink-button {
+    font-size: 1.1rem;
+    padding: 12px 24px;
+  }
+
+  .start-button {
+    font-size: 1.2rem;
+    padding: 14px 32px;
+  }
+
+  .scores-section {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+/* ============================================================
+   遊戲畫面 CSS
+   ============================================================ */
+
+/* -- 遊戲狀態列 -- */
+.game-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  flex-wrap: wrap;
+}
+.game-back-btn {
+  font-size: 0.95rem;
+  padding: 8px 18px;
+  background: var(--ink-black);
+  border-color: var(--ink-black);
+  box-shadow: none;
+}
+.game-back-btn:hover { background: var(--ink-light); }
+.q-counter {
+  font-family: var(--font-brush);
+  font-size: 1.1rem;
+  color: var(--ink-black);
+}
+.q-counter strong { color: var(--cinnabar-red); font-size: 1.3rem; }
+.score-display {
+  font-family: var(--font-brush);
+  font-size: 1.05rem;
+  color: var(--ink-black);
+}
+.score-display strong { color: var(--cinnabar-red); font-size: 1.3rem; }
+
+/* -- 倒數計時 -- */
+.timer-section {
+  margin: 12px 0 8px;
+  text-align: center;
+}
+.timer-digit {
+  font-family: var(--font-brush);
+  font-size: 2.25rem;
+  color: var(--ink-black);
+  transition: color 0.3s;
+  line-height: 1.2;
+}
+.timer-digit.warning { color: var(--tea-gold); }
+.timer-digit.danger {
+  color: var(--cinnabar-red);
+  animation: pulseFast 0.5s ease-in-out infinite;
+}
+.timer-bar-outer {
+  width: 100%;
+  height: 18px;
+  background: rgba(180,160,120,0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 4px;
+  border: 1px solid var(--paper-darker);
+}
+.timer-bar-inner {
+  height: 100%;
+  width: 100%;
+  border-radius: 10px;
+  transition: width 0.95s linear, background 0.5s;
+  background: var(--bamboo-green);
+}
+.timer-bar-inner.gold { background: var(--tea-gold); }
+.timer-bar-inner.red  { background: var(--cinnabar-red); }
+.timer-bar-inner.danger {
+  animation: barPulse 0.4s ease-in-out infinite;
+  background: linear-gradient(90deg, var(--cinnabar-red), var(--forge-orange), var(--cinnabar-red));
+  background-size: 200% 100%;
+}
+@keyframes barPulse {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.4); }
+}
+
+/* -- 連擊徽章 -- */
+.combo-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-family: var(--font-brush);
+  font-size: 1rem;
+  color: var(--white);
+  background: linear-gradient(135deg, var(--forge-orange), var(--tea-gold));
+  padding: 6px 16px;
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(212,168,44,0.4);
+  animation: comboJump 0.5s ease;
+  z-index: 5;
+}
+@keyframes comboJump {
+  0%   { transform: scale(0.5); opacity: 0; }
+  60%  { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* -- 題目區域 -- */
+.question-area {
+  position: relative;
+  margin: 12px 0;
+  padding: 20px 16px;
+  text-align: center;
+  min-height: 380px;
+}
+.parts-display h3 {
+  font-family: var(--font-brush);
+  font-size: 1.2rem;
+  color: var(--ink-black);
+  margin-bottom: 14px;
+}
+.parts-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.part-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  font-family: var(--font-brush);
+  font-size: 3rem;
+  color: var(--ink-black);
+  background: linear-gradient(180deg, #FFFDF7, #F5EBD8);
+  border: 2px solid var(--cinnabar-red);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 12px rgba(232,116,60,0.25);
+  transition: all 0.5s ease;
+  position: relative;
+}
+.part-card.fly-to-forge {
+  animation: flyDown 0.5s ease-in forwards;
+  pointer-events: none;
+}
+@keyframes flyDown {
+  0%   { transform: translateY(0) scale(1); opacity: 1; }
+  50%  { transform: translateY(30px) scale(0.7); opacity: 0.7; }
+  100% { transform: translateY(60px) scale(0.3); opacity: 0; }
+}
+.plus-sign {
+  font-family: var(--font-brush);
+  font-size: 2rem;
+  color: var(--cinnabar-red);
+  font-weight: bold;
+  user-select: none;
+}
+
+/* -- 迷你煉字爐 -- */
+.mini-forge-area {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 6px;
+}
+.mini-forge-svg {
+  width: 140px;
+  height: 85px;
+}
+.forge-char-result {
+  font-family: var(--font-brush);
+  font-size: 3.5rem;
+  color: var(--cinnabar-red);
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+}
+.forge-char-result.revealed {
+  animation: charReveal 0.6s ease;
+}
+@keyframes charReveal {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.3); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.forge-char-result .seal-stamp-mini {
+  display: inline-block;
+  font-size: 0.8rem;
+  padding: 2px 10px;
+  margin-left: 8px;
+  vertical-align: middle;
+  animation: stampDown 0.4s ease 0.3s both;
+}
+@keyframes stampDown {
+  0%   { transform: scale(2) rotate(-15deg); opacity: 0; }
+  100% { transform: scale(1) rotate(-3deg); opacity: 1; }
+}
+
+/* -- 選項網格 -- */
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+.option-btn {
+  position: relative;
+  font-family: var(--font-brush);
+  font-size: 2.5rem;
+  padding: 14px 8px;
+  min-height: 96px;
+  background: linear-gradient(180deg, #FFFDF7, #F5EBD8);
+  border: 2px solid var(--cinnabar-red);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--ink-black);
+  box-shadow: 0 2px 8px var(--shadow-light);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.option-btn:hover:not(:disabled) {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(200,66,61,0.25);
+  border-color: var(--forge-orange);
+}
+.option-btn:active:not(:disabled) {
+  transform: scale(0.95);
+  transition: all 0.08s ease;
+}
+.option-btn:disabled {
+  cursor: not-allowed;
+}
+.option-btn .key-hint {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: var(--ink-light);
+  opacity: 0.5;
+}
+.option-btn.correct-pick {
+  border-color: var(--bamboo-green) !important;
+  background: linear-gradient(180deg, #E8F5E0, #C8E6C0) !important;
+  animation: correctGlow 0.5s ease;
+}
+@keyframes correctGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(107,142,78,0.3); }
+  50%      { box-shadow: 0 0 24px rgba(107,142,78,0.7); }
+}
+.option-btn.wrong-pick {
+  border-color: var(--cinnabar-red) !important;
+  background: linear-gradient(180deg, #FDE8E8, #F8C8C8) !important;
+  animation: shake 0.5s ease;
+}
+.option-btn.highlight-correct {
+  border-color: var(--bamboo-green) !important;
+  background: linear-gradient(180deg, #E8F5E0, #C8E6C0) !important;
+  animation: correctPulse 0.8s ease 3;
+}
+@keyframes correctPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(107,142,78,0.4); }
+  50%      { box-shadow: 0 0 20px rgba(107,142,78,0.8); }
+}
+.option-btn.dimmed {
+  opacity: 0.25;
+  transform: scale(0.95);
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  15%      { transform: translateX(-8px); }
+  30%      { transform: translateX(8px); }
+  45%      { transform: translateX(-6px); }
+  60%      { transform: translateX(6px); }
+  75%      { transform: translateX(-3px); }
+  90%      { transform: translateX(3px); }
+}
+
+/* -- 工具列 -- */
+.toolbar {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.tool-btn {
+  font-family: var(--font-brush);
+  font-size: 1rem;
+  padding: 10px 22px;
+  min-height: 48px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--paper-darker);
+  cursor: pointer;
+  background: rgba(255,253,247,0.7);
+  color: var(--ink-black);
+  transition: all var(--transition-normal);
+}
+.tool-btn:hover:not(:disabled) {
+  background: var(--white);
+  box-shadow: 0 2px 8px var(--shadow-medium);
+}
+.tool-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.hint-btn { border-color: var(--blue-porcelain); color: var(--blue-porcelain); }
+.skip-btn  { border-color: var(--ink-light); color: var(--ink-light); }
+
+/* -- 逾時覆蓋層 -- */
+.timeout-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245,235,216,0.85);
+  z-index: 10;
+  border-radius: var(--radius-md);
+  pointer-events: none;
+}
+.timeout-text {
+  font-family: var(--font-brush);
+  font-size: 3rem;
+  color: var(--cinnabar-red);
+  animation: pulseFast 0.6s ease-in-out 3;
+}
+@keyframes pulseFast {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.1); opacity: 0.7; }
+}
+
+/* -- 解析卡片 -- */
+.analysis-card {
+  background: var(--white);
+  border: 2px solid var(--paper-darker);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  max-width: 420px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  text-align: center;
+  box-shadow: 0 8px 40px var(--shadow-heavy);
+  animation: modalIn 0.35s ease;
+  position: relative;
+}
+.analysis-card .ac-seal {
+  display: inline-block;
+  font-family: var(--font-brush);
+  color: var(--cinnabar-red);
+  border: 2.5px solid var(--cinnabar-red);
+  padding: 6px 16px;
+  transform: rotate(-3deg);
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  border-radius: var(--radius-sm);
+}
+.analysis-card .ac-char {
+  font-family: var(--font-brush);
+  font-size: 5rem;
+  color: var(--cinnabar-red);
+  line-height: 1.1;
+}
+.analysis-card .ac-divider {
+  width: 60%;
+  height: 1.5px;
+  background: var(--paper-darker);
+  margin: 10px auto;
+}
+.analysis-card .ac-detail {
+  text-align: left;
+  font-size: 0.95rem;
+  color: var(--ink-black);
+  line-height: 1.8;
+}
+.analysis-card .ac-detail span {
+  display: inline-block;
+  margin-right: 4px;
+}
+.analysis-card .ac-score {
+  font-family: var(--font-brush);
+  font-size: 1.3rem;
+  color: var(--bamboo-green);
+  margin: 10px 0;
+}
+.analysis-card .ac-score.zero {
+  color: var(--cinnabar-red);
+}
+.analysis-card .ac-next-btn {
+  display: inline-block;
+  margin-top: 8px;
+  font-family: var(--font-brush);
+  font-size: 1.1rem;
+  color: var(--white);
+  background: var(--cinnabar-red);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 12px 32px;
+  cursor: pointer;
+  min-height: 48px;
+  transition: all var(--transition-normal);
+}
+.analysis-card .ac-next-btn:hover {
+  background: var(--cinnabar-dark);
+  transform: translateY(-2px);
+}
+
+/* -- 金粉粒子 -- */
+.gold-particles {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  z-index: 15;
+}
+.gold-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--tea-gold);
+  animation: particleBurst 0.8s ease-out forwards;
+}
+@keyframes particleBurst {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--px), var(--py)) scale(0); opacity: 0; }
+}
+
+/* -- 提示浮層 -- */
+.hint-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 80;
+  background: var(--white);
+  border: 2px solid var(--blue-porcelain);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 8px 40px var(--shadow-heavy);
+  animation: modalIn 0.3s ease;
+  max-width: 320px;
+  width: 85%;
+}
+.hint-popup .hint-icon {
+  font-size: 2.5rem;
+}
+.hint-popup .hint-text {
+  font-family: var(--font-brush);
+  font-size: 1.15rem;
+  margin: 10px 0;
+  color: var(--ink-black);
+  line-height: 1.6;
+}
+.hint-popup .hint-close {
+  font-family: var(--font-brush);
+  font-size: 0.95rem;
+  padding: 8px 20px;
+  min-height: 44px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--blue-porcelain);
+  color: var(--white);
+  cursor: pointer;
+}
+
+/* -- 離開確認 Modal -- */
+#leave-modal .modal {
+  text-align: center;
+}
+#leave-modal .modal-btns {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+#btn-leave-yes {
+  font-family: var(--font-brush);
+  font-size: 1rem;
+  color: var(--white);
+  background: var(--ink-black);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 24px;
+  cursor: pointer;
+  min-height: 44px;
+}
+#btn-leave-no {
+  font-family: var(--font-brush);
+  font-size: 1rem;
+  color: var(--white);
+  background: var(--cinnabar-red);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 24px;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+/* -- Game RWD -- */
+@media (max-width: 768px) {
+  .game-status-bar {
+    gap: 8px;
+    font-size: 0.9rem;
+  }
+  .game-back-btn { font-size: 0.85rem; padding: 6px 14px; }
+  .timer-digit { font-size: 1.8rem; }
+  .part-card { width: 64px; height: 64px; font-size: 2.2rem; }
+  .plus-sign { font-size: 1.5rem; }
+  .options-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .option-btn {
+    font-size: 2rem;
+    min-height: 80px;
+    padding: 12px 6px;
+  }
+  .mini-forge-svg { width: 110px; height: 70px; }
+  .forge-char-result { font-size: 2.5rem; min-height: 56px; }
+  .timeout-text { font-size: 2.2rem; }
+  .analysis-card .ac-char { font-size: 3.5rem; }
+}
+
+@media (max-width: 480px) {
+  .game-status-bar {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) 96px;
+    grid-template-areas:
+      "back question spacer"
+      "back score spacer";
+    gap: 2px 8px;
+    min-height: 66px;
+    font-size: 0.8rem;
+    padding-right: 0;
+  }
+  .game-back-btn {
+    grid-area: back;
+    align-self: center;
+    font-size: 0.8rem;
+    padding: 5px 10px;
+  }
+  .q-counter {
+    grid-area: question;
+    text-align: center;
+  }
+  .score-display {
+    grid-area: score;
+    text-align: center;
+  }
+  .timer-digit { font-size: 1.5rem; }
+  .q-counter, .score-display { font-size: 0.85rem; }
+  .q-counter strong, .score-display strong { font-size: 1rem; }
+  .part-card { width: 52px; height: 52px; font-size: 1.8rem; }
+  .parts-display h3 { font-size: 1rem; }
+  .options-grid { gap: 8px; }
+  .option-btn {
+    font-size: 1.6rem;
+    min-height: 66px;
+    padding: 10px 4px;
+  }
+  .option-btn .key-hint { font-size: 0.6rem; top: 2px; left: 4px; }
+  .tool-btn { font-size: 0.9rem; padding: 8px 16px; }
+  .mini-forge-svg { width: 90px; height: 58px; }
+  .forge-char-result { font-size: 2rem; min-height: 46px; }
+  .timeout-text { font-size: 1.8rem; }
+  .combo-badge { font-size: 0.85rem; padding: 4px 12px; top: 6px; right: 6px; }
+  .analysis-card { padding: 20px 16px; }
+  .analysis-card .ac-char { font-size: 2.8rem; }
+  .analysis-card .ac-detail { font-size: 0.85rem; }
+}
+
+/* ============================================================
+   載入畫面 (Loading)
+   ============================================================ */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--paper-cream);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.loading-overlay.hide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.loading-forge {
+  width: 100px;
+  height: 120px;
+  margin-bottom: 16px;
+}
+.loading-text {
+  font-family: var(--font-brush);
+  font-size: 1.4rem;
+  color: var(--cinnabar-red);
+  animation: pulseFast 1s ease-in-out infinite;
+}
+.loading-flame {
+  animation: flicker 0.6s ease-in-out infinite alternate;
+  transform-origin: center bottom;
+}
+
+/* ============================================================
+   結算頁 #screen-result
+   ============================================================ */
+.result-header {
+  text-align: center;
+  padding: 20px 0 0;
+  position: relative;
+}
+.result-title {
+  font-family: var(--font-brush);
+  font-size: 2.6rem;
+  margin-bottom: 4px;
+  animation: bounceIn 0.6s ease;
+}
+.result-title.grade-s  { color: var(--cinnabar-red); }
+.result-title.grade-a  { color: var(--tea-gold); }
+.result-title.grade-b  { color: var(--bamboo-green); }
+.result-title.grade-c  { color: var(--blue-porcelain); }
+.result-title.grade-d  { color: var(--ink-light); }
+
+@keyframes bounceIn {
+  0%   { transform: scale(0.3); opacity: 0; }
+  50%  { transform: scale(1.08); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* -- 分數卡 -- */
+.result-score-card {
+  text-align: center;
+  padding: 28px 20px;
+  margin: 16px 0;
+  position: relative;
+  overflow: hidden;
+}
+.rs-player {
+  font-family: var(--font-brush);
+  font-size: 1.2rem;
+  color: var(--ink-light);
+  margin-bottom: 4px;
+}
+.rs-big-score {
+  font-family: var(--font-brush);
+  font-size: 5.5rem;
+  color: var(--cinnabar-red);
+  line-height: 1;
+  animation: countUp 0.8s ease;
+}
+@keyframes countUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.rs-out-of {
+  font-size: 1.1rem;
+  color: var(--ink-light);
+}
+.rs-grade {
+  display: inline-block;
+  margin-top: 10px;
+  font-family: var(--font-brush);
+  font-size: 1.3rem;
+  padding: 8px 24px;
+  border-radius: 20px;
+  animation: bounceIn 0.6s ease 0.3s both;
+}
+.rs-grade.s { background: linear-gradient(135deg, #FFD700, #FFA000); color: #fff; }
+.rs-grade.ap { background: var(--cinnabar-red); color: #fff; }
+.rs-grade.a { background: var(--tea-gold); color: #fff; }
+.rs-grade.b { background: var(--bamboo-green); color: #fff; }
+.rs-grade.c { background: var(--blue-porcelain); color: #fff; }
+.rs-grade.d { background: var(--ink-light); color: #fff; }
+
+/* 火焰邊框（高分用） */
+.result-score-card.flame-glow::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  padding: 3px;
+  background: linear-gradient(180deg, var(--forge-orange), var(--flame-yellow), var(--forge-orange));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: flameBorderPulse 2s ease-in-out infinite;
+}
+@keyframes flameBorderPulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+
+/* -- 統計小卡 -- */
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+.stat-card {
+  text-align: center;
+  padding: 14px 8px;
+  background: rgba(255,253,247,0.7);
+  border: 1px solid var(--paper-darker);
+  border-radius: var(--radius-md);
+  animation: staggerFadeIn 0.5s ease forwards;
+}
+.stat-card .stat-icon { font-size: 1.6rem; margin-bottom: 4px; }
+.stat-card .stat-value { font-family: var(--font-brush); font-size: 1.5rem; font-weight: bold; color: var(--cinnabar-red); }
+.stat-card .stat-label { font-size: 0.8rem; color: var(--ink-light); margin-top: 2px; }
+
+/* -- 煉字成果 -- */
+.result-chars-section {
+  margin: 20px 0;
+}
+.result-chars-section h3 {
+  font-family: var(--font-brush);
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 12px;
+  color: var(--ink-black);
+}
+.result-chars-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.char-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 80px;
+  background: linear-gradient(180deg, #FFFDF7, #F5EBD8);
+  border: 1.5px solid var(--cinnabar-red);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+}
+.char-chip:hover {
+  transform: translateY(-4px) scale(1.1);
+  box-shadow: 0 4px 12px rgba(200,66,61,0.25);
+  z-index: 2;
+}
+.char-chip .chip-char {
+  font-family: var(--font-brush);
+  font-size: 2rem;
+  color: var(--ink-black);
+  line-height: 1;
+}
+.char-chip .chip-jp {
+  font-size: 0.6rem;
+  color: var(--ink-light);
+  margin-top: 2px;
+}
+.no-chars-msg {
+  text-align: center;
+  color: var(--ink-light);
+  font-size: 0.95rem;
+  padding: 12px;
+}
+
+/* -- 操作按鈕 -- */
+.result-actions {
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 24px 0 30px;
+}
+.result-actions .ra-btn {
+  font-family: var(--font-brush);
+  font-size: 1.15rem;
+  padding: 14px 28px;
+  min-height: 52px;
+  min-width: 160px;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+.ra-replay {
+  background: var(--cinnabar-red);
+  color: var(--white);
+  box-shadow: 0 4px 12px rgba(200,66,61,0.3);
+}
+.ra-replay:hover { background: var(--cinnabar-dark); transform: translateY(-2px); }
+.ra-home {
+  background: var(--ink-black);
+  color: var(--white);
+}
+.ra-home:hover { background: var(--ink-light); transform: translateY(-2px); }
+.ra-share {
+  background: var(--blue-porcelain);
+  color: var(--white);
+}
+.ra-share:hover { background: #2E5A78; transform: translateY(-2px); }
+
+/* -- 分享 Toast -- */
+.share-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  background: var(--ink-black);
+  color: var(--white);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 12px 28px;
+  border-radius: 30px;
+  box-shadow: 0 4px 20px var(--shadow-heavy);
+  animation: toastIn 0.4s ease, toastOut 0.4s ease 1.6s forwards;
+}
+@keyframes toastIn {
+  from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+  to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+@keyframes toastOut {
+  from { opacity: 1; }
+  to   { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+}
+
+/* -- 成就通知 -- */
+.ach-notification-container {
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  z-index: 150;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.ach-notification {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--white);
+  border: 2px solid var(--tea-gold);
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  box-shadow: 0 4px 20px rgba(212,168,44,0.3);
+  animation: slideInRight 0.5s ease, slideOutRight 0.4s ease 4.5s forwards;
+  max-width: 280px;
+}
+.ach-notification .ach-n-icon { font-size: 1.8rem; }
+.ach-notification .ach-n-info h4 {
+  font-family: var(--font-brush);
+  font-size: 0.95rem;
+  margin: 0;
+  color: var(--ink-black);
+}
+.ach-notification .ach-n-info p {
+  font-size: 0.75rem;
+  color: var(--ink-light);
+  margin: 2px 0 0;
+}
+@keyframes slideInRight {
+  from { transform: translateX(120%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to   { transform: translateX(120%); opacity: 0; }
+}
+
+/* -- 星星動畫 (中等分數) -- */
+.stars-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+.star-particle {
+  position: absolute;
+  animation: starTwinkle 1.5s ease-in-out infinite;
+}
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50%      { opacity: 1; transform: scale(1.3); }
+}
+
+/* -- 煙火粒子 (高分) -- */
+.firework-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: fireworkBurst 1.2s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes fireworkBurst {
+  0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--fx), var(--fy)) scale(0); opacity: 0; }
+}
+
+/* -- 鼓勵動畫 (低分) -- */
+.encourage-emoji {
+  position: absolute;
+  font-size: 2rem;
+  animation: encourageJump 1s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes encourageJump {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25%      { transform: translateY(-20px) rotate(-10deg); }
+  75%      { transform: translateY(-10px) rotate(10deg); }
+}
+
+/* -- 結算頁 RWD -- */
+@media (max-width: 768px) {
+  .result-title { font-size: 1.8rem; }
+  .rs-big-score { font-size: 3.5rem; }
+  .result-stats { grid-template-columns: repeat(2, 1fr); }
+  .result-actions { flex-direction: column; align-items: center; }
+  .result-actions .ra-btn { width: 100%; max-width: 280px; }
+  .char-chip { width: 52px; height: 66px; }
+  .char-chip .chip-char { font-size: 1.5rem; }
+  .ach-notification-container { top: 60px; right: 8px; }
+  .ach-notification { max-width: 240px; padding: 10px 14px; }
+}
+@media (max-width: 480px) {
+  .result-title { font-size: 1.5rem; }
+  .rs-big-score { font-size: 2.8rem; }
+  .rs-grade { font-size: 1rem; }
+  .stat-card .stat-value { font-size: 1.2rem; }
+  .stat-card .stat-icon { font-size: 1.2rem; }
+  .char-chip { width: 44px; height: 56px; }
+  .char-chip .chip-char { font-size: 1.2rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     載入畫面
+     ============================================================ -->
+<div class="loading-overlay" id="loading-overlay">
+  <svg class="loading-forge" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="50" cy="35" rx="35" ry="10" fill="#8B6914"/>
+    <ellipse cx="50" cy="35" rx="28" ry="7" fill="#3A2010"/>
+    <path d="M18,35 L14,90 Q14,95 22,97 L78,97 Q86,95 86,90 L82,35 Z" fill="#C49A3C" stroke="#5C3D0E" stroke-width="1.5"/>
+    <ellipse cx="50" cy="55" rx="32" ry="6" fill="none" stroke="#5C3D0E" stroke-width="1" opacity="0.4"/>
+    <g class="loading-flame">
+      <path d="M32,33 Q28,18 38,8 Q42,2 48,8 Q50,3 52,8 Q58,2 62,8 Q72,18 68,33 Z" fill="#E8743C" opacity="0.7"/>
+      <path d="M38,33 Q36,22 44,14 Q47,9 50,14 Q53,9 56,14 Q64,22 62,33 Z" fill="#FF9A5C" opacity="0.8"/>
+      <path d="M43,33 Q42,25 48,19 Q50,16 52,19 Q58,25 57,33 Z" fill="#FFD54F" opacity="0.9"/>
+    </g>
+  </svg>
+  <div class="loading-text">煉字爐預熱中…</div>
+</div>
+
+<!-- ============================================================
+     燈籠 + 雲紋裝飾
+     ============================================================ -->
+<div class="lantern-container left">
+  <svg class="lantern" viewBox="0 0 40 56" xmlns="http://www.w3.org/2000/svg">
+    <rect x="16" y="0" width="8" height="6" rx="2" fill="#C8423D"/>
+    <ellipse cx="20" cy="6" rx="8" ry="2" fill="#C8423D"/>
+    <ellipse cx="20" cy="28" rx="18" ry="22" fill="#C8423D" opacity="0.9"/>
+    <ellipse cx="20" cy="28" rx="12" ry="16" fill="#E8743C" opacity="0.4"/>
+    <rect x="16" y="50" width="8" height="6" rx="2" fill="#D4A82C"/>
+    <ellipse cx="20" cy="50" rx="8" ry="2" fill="#D4A82C"/>
+    <line x1="16" y1="2" x2="16" y2="4" stroke="#D4A82C" stroke-width="1"/>
+  </svg>
+</div>
+
+<div class="lantern-container right">
+  <svg class="lantern" viewBox="0 0 40 56" xmlns="http://www.w3.org/2000/svg">
+    <rect x="16" y="0" width="8" height="6" rx="2" fill="#C8423D"/>
+    <ellipse cx="20" cy="6" rx="8" ry="2" fill="#C8423D"/>
+    <ellipse cx="20" cy="28" rx="18" ry="22" fill="#C8423D" opacity="0.9"/>
+    <ellipse cx="20" cy="28" rx="12" ry="16" fill="#E8743C" opacity="0.4"/>
+    <rect x="16" y="50" width="8" height="6" rx="2" fill="#D4A82C"/>
+    <ellipse cx="20" cy="50" rx="8" ry="2" fill="#D4A82C"/>
+    <line x1="24" y1="2" x2="24" y2="4" stroke="#D4A82C" stroke-width="1"/>
+  </svg>
+</div>
+
+<!-- ============================================================
+     設定列
+     ============================================================ -->
+<div class="settings-bar">
+  <button class="settings-btn" id="btn-sound" aria-label="切換音效開關" title="音效開關">🔊</button>
+  <button class="settings-btn" id="btn-achievements" aria-label="查看成就" title="成就列表">🏆</button>
+</div>
+
+<!-- ============================================================
+     成就 Modal
+     ============================================================ -->
+<div class="modal-overlay" id="achievement-modal" role="dialog" aria-modal="true" aria-labelledby="achievement-title" aria-hidden="true">
+  <div class="modal">
+    <h3 id="achievement-title">🏆 成就列表</h3>
+    <div class="modal-body" id="achievement-modal-body">
+    <div id="achievement-list">
+      <div class="achievement-item locked">
+        <span class="achievement-icon">⭐</span>
+        <div class="achievement-info">
+          <h4>初次煉字</h4>
+          <p>完成第一次挑戰</p>
+        </div>
+      </div>
+      <div class="achievement-item locked">
+        <span class="achievement-icon">🔥</span>
+        <div class="achievement-info">
+          <h4>連擊大師</h4>
+          <p>達成 5 連擊</p>
+        </div>
+      </div>
+      <div class="achievement-item locked">
+        <span class="achievement-icon">💯</span>
+        <div class="achievement-info">
+          <h4>滿分達人</h4>
+          <p>取得滿分 100 分</p>
+        </div>
+      </div>
+      <div class="achievement-item locked">
+        <span class="achievement-icon">⚡</span>
+        <div class="achievement-info">
+          <h4>神速煉字</h4>
+          <p>平均每題用時少於 5 秒</p>
+        </div>
+      </div>
+      <div class="achievement-item locked">
+        <span class="achievement-icon">🧠</span>
+        <div class="achievement-info">
+          <h4>不需提示</h4>
+          <p>不使用提示完成挑戰</p>
+        </div>
+      </div>
+    </div>
+    </div>
+    <button class="modal-close" id="btn-modal-close" aria-label="關閉">關閉</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     主內容容器
+     ============================================================ -->
+<div class="app-container">
+
+  <!-- ==================== 首頁 ==================== -->
+  <div class="screen active" id="screen-home">
+
+    <!-- 雲紋 -->
+    <div class="cloud-pattern stagger-item" style="animation-delay: 0s;">
+      <svg viewBox="0 0 960 40" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 20 Q60 0 120 20 Q180 40 240 20 Q300 0 360 20 Q420 40 480 20 Q540 0 600 20 Q660 40 720 20 Q780 0 840 20 Q900 40 960 20"
+              fill="none" stroke="#2C2416" stroke-width="1.5" opacity="0.4"/>
+      </svg>
+    </div>
+
+    <!-- 主標題區 -->
+    <div class="home-header stagger-item" style="animation-delay: 0.1s;">
+      <h1 class="home-title brush-title">部件煉字爐</h1>
+      <p class="home-subtitle">拆字煉字，認識漢字之美</p>
+      <div class="brush-divider">
+        <svg viewBox="0 0 200 20" xmlns="http://www.w3.org/2000/svg">
+          <path d="M10 10 Q40 2 70 8 Q100 14 130 6 Q160 2 190 10"
+                fill="none" stroke="#2C2416" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 煉字爐視覺 -->
+    <div class="forge-visual stagger-item" style="animation-delay: 0.2s;">
+
+      <!-- 部件投入路徑 -->
+      <div class="part-stream" aria-hidden="true">
+        <div class="stream-track"></div>
+        <div class="stream-part part-left-top">日</div>
+        <div class="stream-part part-left-mid">月</div>
+        <div class="stream-part part-right-top">木</div>
+        <div class="stream-part part-right-mid">心</div>
+      </div>
+
+      <!-- 煉字爐 SVG -->
+      <svg class="forge-svg" viewBox="0 0 220 280" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bronze" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#8B6914"/>
+            <stop offset="30%" stop-color="#C49A3C"/>
+            <stop offset="50%" stop-color="#D4B060"/>
+            <stop offset="70%" stop-color="#C49A3C"/>
+            <stop offset="100%" stop-color="#8B6914"/>
+          </linearGradient>
+          <linearGradient id="bronze-dark" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#5C3D0E"/>
+            <stop offset="50%" stop-color="#8B6914"/>
+            <stop offset="100%" stop-color="#5C3D0E"/>
+          </linearGradient>
+          <radialGradient id="flame-glow" cx="50%" cy="80%" r="50%">
+            <stop offset="0%" stop-color="#FFD54F" stop-opacity="0.8"/>
+            <stop offset="50%" stop-color="#E8743C" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#E8743C" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- 爐耳左 -->
+        <ellipse cx="18" cy="80" rx="20" ry="28" fill="none" stroke="url(#bronze)" stroke-width="6"/>
+        <ellipse cx="18" cy="80" rx="10" ry="18" fill="none" stroke="#8B6914" stroke-width="2" opacity="0.5"/>
+
+        <!-- 爐耳右 -->
+        <ellipse cx="202" cy="80" rx="20" ry="28" fill="none" stroke="url(#bronze)" stroke-width="6"/>
+        <ellipse cx="202" cy="80" rx="10" ry="18" fill="none" stroke="#8B6914" stroke-width="2" opacity="0.5"/>
+
+        <!-- 爐口上緣 -->
+        <ellipse cx="110" cy="55" rx="82" ry="18" fill="url(#bronze-dark)"/>
+        <ellipse cx="110" cy="55" rx="70" ry="12" fill="#3A2010"/>
+
+        <!-- 爐身主體 -->
+        <path d="M28 55 Q25 55 25 65 L20 200 Q20 220 40 225 L180 225 Q200 220 200 200 L195 65 Q195 55 192 55 Z"
+              fill="url(#bronze)" stroke="#5C3D0E" stroke-width="2"/>
+
+        <!-- 爐身裝飾環 -->
+        <ellipse cx="110" cy="120" rx="84" ry="12" fill="none" stroke="#5C3D0E" stroke-width="2" opacity="0.5"/>
+        <ellipse cx="110" cy="160" rx="82" ry="10" fill="none" stroke="#5C3D0E" stroke-width="2" opacity="0.5"/>
+
+        <!-- 爐身文字「煉」 -->
+        <text x="110" y="145" text-anchor="middle" font-family="KaiTi, serif"
+              font-size="32" fill="#5C3D0E" opacity="0.6">煉</text>
+
+        <!-- 爐腳左 -->
+        <path d="M45 225 Q40 235 35 245 L55 245 Q60 235 60 225 Z"
+              fill="url(#bronze)" stroke="#5C3D0E" stroke-width="1.5"/>
+
+        <!-- 爐腳中 -->
+        <path d="M100 225 Q100 238 95 248 L125 248 Q120 238 120 225 Z"
+              fill="url(#bronze)" stroke="#5C3D0E" stroke-width="1.5"/>
+
+        <!-- 爐腳右 -->
+        <path d="M160 225 Q155 235 150 245 L170 245 Q175 235 180 225 Z"
+              fill="url(#bronze)" stroke="#5C3D0E" stroke-width="1.5"/>
+
+        <!-- 火焰底部發光 -->
+        <ellipse cx="110" cy="62" rx="55" ry="22" fill="url(#flame-glow)"/>
+
+        <!-- 火焰圖層 3 (最外層) -->
+        <g class="flame-layer" style="animation-delay: 0s;">
+          <path d="M70 62 Q60 45 75 30 Q85 18 95 30 Q100 35 110 25 Q120 15 125 30 Q135 18 145 30 Q155 45 150 62 Z"
+                fill="#E8743C" opacity="0.6"/>
+        </g>
+
+        <!-- 火焰圖層 2 (中層) -->
+        <g class="flame-layer" style="animation-delay: -0.2s;">
+          <path d="M80 62 Q72 48 85 35 Q92 25 100 35 Q108 25 110 18 Q118 28 130 35 Q145 22 148 35 Q158 48 150 62 Z"
+                fill="#FF9A5C" opacity="0.75"/>
+        </g>
+
+        <!-- 火焰圖層 1 (最內層) -->
+        <g class="flame-layer" style="animation-delay: -0.4s;">
+          <path d="M90 62 Q85 50 95 40 Q100 32 108 38 Q112 28 115 38 Q122 32 128 42 Q138 48 132 62 Z"
+                fill="#FFD54F" opacity="0.9"/>
+        </g>
+
+        <!-- 火星粒子 -->
+        <circle cx="95" cy="28" r="2" fill="#FFD54F" opacity="0.7">
+          <animate attributeName="cy" values="28;15;28" dur="1.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.7;0;0.7" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="125" cy="22" r="1.5" fill="#FF9A5C" opacity="0.6">
+          <animate attributeName="cy" values="22;8;22" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="110" cy="20" r="1.5" fill="#FFD54F" opacity="0.5">
+          <animate attributeName="cy" values="20;5;20" dur="1.8s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.5;0;0.5" dur="1.8s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    </div>
+
+    <!-- 介紹文字 -->
+    <div class="intro-section stagger-item" style="animation-delay: 0.3s;">
+      <div class="paper-card">
+        <h3 class="brush-title">什麼是煉字爐？</h3>
+        <p>在這座神奇的爐子裡，把零散的部件投入其中，它們會神奇地組合成一個完整的漢字！你能猜出煉出什麼字嗎？</p>
+        <div class="feature-cards">
+          <div class="feature-card">
+            <div class="icon">🧩</div>
+            <h4>拆解部件</h4>
+            <p>認識字的構造</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon">⚒</div>
+            <h4>煉字組合</h4>
+            <p>訓練思維邏輯</p>
+          </div>
+          <div class="feature-card">
+            <div class="icon">⏱</div>
+            <h4>限時挑戰</h4>
+            <p>增加趣味刺激</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 玩家名稱 -->
+    <div class="name-section stagger-item" style="animation-delay: 0.4s;">
+      <label for="input-name">請告訴我你的名字：</label>
+      <input type="text" id="input-name" class="name-input" maxlength="8"
+             value="小書生" aria-label="輸入你的名字" placeholder="輸入名字">
+    </div>
+
+    <!-- 開始按鈕 -->
+    <div class="start-section stagger-item" style="animation-delay: 0.5s;">
+      <button class="ink-button start-button flame-border" id="btn-start"
+              aria-label="開始煉字遊戲">
+        ⚒ 開始煉字 →
+      </button>
+    </div>
+
+    <!-- 規則說明 -->
+    <div class="rules-section stagger-item" style="animation-delay: 0.55s;">
+      <button class="rules-toggle" id="btn-rules" aria-label="展開遊戲規則" aria-expanded="false" aria-controls="rules-content">
+        📖 遊戲規則
+      </button>
+      <div class="rules-content" id="rules-content" hidden>
+        <ul>
+          <li>從 <strong>20 題</strong>題庫中隨機抽選 <strong>10 題</strong>挑戰</li>
+          <li>每題有 <strong>20 秒</strong>倒數時間</li>
+          <li>給你 2-3 個部件，從 <strong>6 個漢字</strong>選項中選出正確答案</li>
+          <li>答對得 <strong>基礎分 + 速度獎勵</strong></li>
+          <li><strong>連續答對</strong>（連擊）有額外獎勵分數</li>
+          <li>可使用<strong>提示</strong>功能，但會扣減分數</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 歷史成績 -->
+    <div class="scores-section stagger-item" id="history-scores" style="animation-delay: 0.6s; display: none;">
+      <div class="score-badge">
+        🏆 最高分：<span class="highlight" id="display-highscore">0</span> 分
+      </div>
+      <div class="score-badge">
+        📊 已完成挑戰：<span class="highlight" id="display-played">0</span> 次
+      </div>
+    </div>
+
+    <!-- 底部 -->
+    <div class="home-footer stagger-item" style="animation-delay: 0.7s;">
+      <span class="tag">適合 P.3-P.4 同學</span>
+      <p>© 部件煉字爐 2026</p>
+    </div>
+  </div>
+
+  <!-- ==================== 遊戲畫面 ==================== -->
+  <div class="screen" id="screen-game">
+
+    <!-- 狀態列 -->
+    <div class="game-status-bar">
+      <button class="ink-button game-back-btn" id="btn-game-back" aria-label="返回首頁">← 返回</button>
+      <span class="q-counter">第 <strong id="q-curr">1</strong> / 10 題</span>
+      <span class="score-display">得分：<strong id="score-live">0</strong> 分</span>
+    </div>
+
+    <!-- 倒數計時 -->
+    <div class="timer-section">
+      <div class="timer-digit" id="timer-digit">⏱ 20</div>
+      <div class="timer-bar-outer">
+        <div class="timer-bar-inner" id="timer-bar"></div>
+      </div>
+    </div>
+
+    <!-- 題目區域 -->
+    <div class="question-area paper-card" id="question-area">
+
+      <!-- 連擊徽章 -->
+      <div class="combo-badge" id="combo-badge" style="display:none;">
+        🔥 連擊 <span id="combo-count">0</span>
+      </div>
+
+      <!-- 逾時覆蓋 -->
+      <div class="timeout-overlay" id="timeout-overlay" style="display:none;">
+        <div class="timeout-text">⏰ 時間到！</div>
+      </div>
+
+      <!-- 部件展示 -->
+      <div class="parts-display" id="parts-display">
+        <h3>⚒ 投入這些部件，煉成什麼字？</h3>
+        <div class="parts-row" id="parts-row"></div>
+        <div class="mini-forge-area" id="mini-forge-area">
+          <svg class="mini-forge-svg" viewBox="0 0 160 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="mbronze" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#8B6914"/>
+                <stop offset="30%" stop-color="#C49A3C"/>
+                <stop offset="50%" stop-color="#D4B060"/>
+                <stop offset="70%" stop-color="#C49A3C"/>
+                <stop offset="100%" stop-color="#8B6914"/>
+              </linearGradient>
+              <linearGradient id="mbronze-dark" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#5C3D0E"/>
+                <stop offset="50%" stop-color="#8B6914"/>
+                <stop offset="100%" stop-color="#5C3D0E"/>
+              </linearGradient>
+            </defs>
+            <!-- 爐身 -->
+            <path d="M35,65 L25,95 L135,95 L125,65 Z" fill="url(#mbronze)" stroke="#5C3D0E" stroke-width="1.5"/>
+            <!-- 爐口 -->
+            <ellipse cx="80" cy="65" rx="45" ry="8" fill="url(#mbronze-dark)"/>
+            <ellipse cx="80" cy="65" rx="36" ry="5" fill="#3A2010"/>
+            <!-- 火焰 -->
+            <g class="flame-layer" style="animation-duration:0.7s;">
+              <path d="M52,63 Q46,42 58,30 Q62,22 68,32 Q73,28 78,18 Q83,28 88,32 Q94,22 98,30 Q110,42 104,63 Z" fill="#E8743C" opacity="0.65"/>
+            </g>
+            <g class="flame-layer" style="animation-duration:0.5s;animation-delay:-0.15s;">
+              <path d="M64,63 Q60,48 68,36 Q72,28 78,36 Q80,30 84,36 Q90,28 94,36 Q102,48 98,63 Z" fill="#FF9A5C" opacity="0.8"/>
+            </g>
+            <g class="flame-layer" style="animation-duration:0.85s;animation-delay:-0.35s;">
+              <path d="M72,63 Q69,52 76,42 Q79,36 82,42 Q84,38 87,42 Q94,52 90,63 Z" fill="#FFD54F" opacity="0.9"/>
+            </g>
+          </svg>
+          <div class="forge-char-result" id="forge-char-result">?</div>
+          <!-- 金粉容器 -->
+          <div class="gold-particles" id="gold-particles"></div>
+        </div>
+      </div>
+
+      <!-- 候選字 -->
+      <div class="options-grid" id="options-grid"></div>
+    </div>
+
+    <!-- 工具列 -->
+    <div class="toolbar">
+      <button class="tool-btn hint-btn" id="btn-hint" aria-label="使用提示">💡 提示（剩 1 次）</button>
+      <button class="tool-btn skip-btn" id="btn-skip" aria-label="跳過此題">⏭ 跳過</button>
+    </div>
+
+    <!-- 解析卡片 Modal -->
+    <div class="modal-overlay" id="analysis-overlay">
+      <div class="analysis-card" id="analysis-card"></div>
+    </div>
+
+    <!-- 離開確認 Modal -->
+    <div class="modal-overlay" id="leave-modal">
+      <div class="modal">
+        <h3>⚠️ 確定要放棄煉字嗎？</h3>
+        <p>目前的煉字進度將會消失喔！</p>
+        <div class="modal-btns">
+          <button class="ink-button" id="btn-leave-no">繼續煉字</button>
+          <button id="btn-leave-yes">確定離開</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== 結算畫面 ==================== -->
+  <div class="screen" id="screen-result">
+
+    <!-- 特效容器 -->
+    <div class="stars-container" id="stars-container"></div>
+
+    <!-- 標題 -->
+    <div class="result-header">
+      <div class="result-title brush-title" id="result-title">煉字大師！</div>
+    </div>
+
+    <!-- 分數卡 -->
+    <div class="result-score-card paper-card" id="result-score-card">
+      <div class="rs-player" id="rs-player"></div>
+      <div class="rs-big-score" id="rs-big-score">0</div>
+      <div class="rs-out-of">/ 300 分</div>
+      <div class="rs-grade" id="rs-grade"></div>
+    </div>
+
+    <!-- 統計小卡 -->
+    <div class="result-stats" id="result-stats">
+      <div class="stat-card" style="animation-delay:0.1s">
+        <div class="stat-icon">✓</div>
+        <div class="stat-value" id="stat-correct">0/10</div>
+        <div class="stat-label">答對題數</div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.2s">
+        <div class="stat-icon">⏱</div>
+        <div class="stat-value" id="stat-avgtime">--</div>
+        <div class="stat-label">平均用時</div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.3s">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-value" id="stat-combo">0</div>
+        <div class="stat-label">最高連擊</div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.4s">
+        <div class="stat-icon">💡</div>
+        <div class="stat-value" id="stat-hints">0 次</div>
+        <div class="stat-label">提示使用</div>
+      </div>
+    </div>
+
+    <!-- 煉字成果 -->
+    <div class="result-chars-section">
+      <h3>⚒ 你今天煉成了這些字</h3>
+      <div class="result-chars-grid" id="result-chars"></div>
+    </div>
+
+    <!-- 操作按鈕 -->
+    <div class="result-actions">
+      <button class="ra-btn ra-replay" id="btn-replay" aria-label="再煉一次">🔄 再煉一次</button>
+      <button class="ra-btn ra-home" id="btn-result-home" aria-label="回到首頁">🏠 回到首頁</button>
+      <button class="ra-btn ra-share" id="btn-share" aria-label="分享成績">📤 分享成績</button>
+    </div>
+
+    <!-- 成就通知容器 -->
+    <div class="ach-notification-container" id="ach-notifications"></div>
+
+    <!-- 漢字詳情 Modal -->
+    <div class="modal-overlay" id="char-detail-modal">
+      <div class="analysis-card" id="char-detail-card"></div>
+    </div>
+  </div>
+
+</div><!-- /.app-container -->
+
+<script>
+/* ============================================================
+   全域 GameState
+   ============================================================ */
+const GameState = {
+  currentScreen: 'home',
+  playerName: '小書生',
+  highScore: 0,
+  totalPlayed: 0,
+  unlockedAchievements: [],
+  soundOn: true,
+  // 當前遊戲狀態
+  currentQuestion: 0,
+  score: 0,
+  combo: 0,
+  maxCombo: 0,
+  correctCount: 0,
+  collectedChars: [],
+  hintsUsed: 0,
+  totalTimeUsed: 0
+};
+
+/* ============================================================
+   畫面切換
+   ============================================================ */
+function switchScreen(screenId) {
+  // 移除所有 active
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  // 加入目標 screen
+  const target = document.getElementById(screenId);
+  if (target) {
+    target.classList.add('active');
+    GameState.currentScreen = screenId.replace('screen-', '');
+  }
+}
+
+/* ============================================================
+   音效系統 (Web Audio API)
+   ============================================================ */
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
+}
+
+function playTone(freq, type, duration, volume = 0.3, rampDown = true) {
+  if (!GameState.soundOn) return;
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    if (rampDown) {
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    }
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch (e) {
+    // 忽略音效錯誤
+  }
+}
+
+function playClickSound() {
+  // 短促木魚聲，220Hz
+  playTone(220, 'sine', 0.12, 0.4);
+}
+
+function playCorrectSound() {
+  // 清脆三連音上行
+  if (!GameState.soundOn) return;
+  try {
+    const ctx = getAudioCtx();
+    const notes = [523, 659, 784]; // C5, E5, G5
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.2);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.12);
+      osc.stop(ctx.currentTime + i * 0.12 + 0.25);
+    });
+  } catch (e) { /* ignore */ }
+}
+
+function playWrongSound() {
+  // 低沉鼓聲，110Hz
+  playTone(110, 'triangle', 0.3, 0.35);
+}
+
+function playTickSound() {
+  // 心跳聲
+  playTone(80, 'sine', 0.08, 0.5);
+}
+
+function playForgeSound() {
+  // 金屬鏗鏘聲
+  if (!GameState.soundOn) return;
+  try {
+    const ctx = getAudioCtx();
+    const notes = [880, 1320, 1760];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq * 0.5, ctx.currentTime + i * 0.06);
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.06 + 0.03);
+      gain.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.06 + 0.25);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.06);
+      osc.stop(ctx.currentTime + i * 0.06 + 0.3);
+    });
+  } catch (e) { /* ignore */ }
+}
+
+/* ============================================================
+   音效開關
+   ============================================================ */
+const btnSound = document.getElementById('btn-sound');
+
+function updateSoundButton() {
+  if (GameState.soundOn) {
+    btnSound.textContent = '🔊';
+    btnSound.classList.remove('sound-off');
+    btnSound.setAttribute('aria-label', '關閉音效');
+  } else {
+    btnSound.textContent = '🔇';
+    btnSound.classList.add('sound-off');
+    btnSound.setAttribute('aria-label', '開啟音效');
+  }
+}
+
+btnSound.addEventListener('click', () => {
+  GameState.soundOn = !GameState.soundOn;
+  updateSoundButton();
+  playClickSound();
+});
+
+/* ============================================================
+   儲存 / 載入
+   ============================================================ */
+const STORAGE_KEY = 'forge_char_state';
+
+function saveState() {
+  const toSave = {
+    playerName: GameState.playerName,
+    highScore: GameState.highScore,
+    totalPlayed: GameState.totalPlayed,
+    unlockedAchievements: GameState.unlockedAchievements,
+    soundOn: GameState.soundOn
+  };
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  } catch (e) { /* ignore */ }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      if (saved.playerName) GameState.playerName = saved.playerName;
+      if (typeof saved.highScore === 'number') GameState.highScore = saved.highScore;
+      if (typeof saved.totalPlayed === 'number') GameState.totalPlayed = saved.totalPlayed;
+      if (Array.isArray(saved.unlockedAchievements)) GameState.unlockedAchievements = saved.unlockedAchievements;
+      if (typeof saved.soundOn === 'boolean') GameState.soundOn = saved.soundOn;
+    }
+  } catch (e) { /* ignore */ }
+}
+
+loadState();
+
+/* ============================================================
+   玩家名稱
+   ============================================================ */
+const inputName = document.getElementById('input-name');
+inputName.value = GameState.playerName;
+
+inputName.addEventListener('input', () => {
+  GameState.playerName = inputName.value.trim() || '小書生';
+  saveState();
+});
+
+/* ============================================================
+   題庫資料
+   ============================================================ */
+const gameData = [
+  {
+    parts: ['日', '月'], answer: '明',
+    options: ['明', '日', '月', '冒', '昌', '盟'],
+    meaning: '光亮、明白',
+    explain: '日月同輝 = 明亮',
+    jyutping: 'ming4', strokes: 8,
+    type: '會意字'
+  },
+  {
+    parts: ['木', '木'], answer: '林',
+    options: ['林', '森', '木', '本', '末', '相'],
+    meaning: '樹林',
+    explain: '兩棵樹並排 = 樹林',
+    jyutping: 'lam4', strokes: 8,
+    type: '會意字'
+  },
+  {
+    parts: ['人', '木'], answer: '休',
+    options: ['休', '伙', '什', '呆', '本', '体'],
+    meaning: '休息',
+    explain: '人靠在樹旁 = 休息',
+    jyutping: 'jau1', strokes: 6,
+    type: '會意字'
+  },
+  {
+    parts: ['木', '木', '木'], answer: '森',
+    options: ['森', '林', '淼', '焱', '晶', '品'],
+    meaning: '樹木茂密',
+    explain: '三棵樹 = 茂密的森林',
+    jyutping: 'sam1', strokes: 12,
+    type: '會意字'
+  },
+  {
+    parts: ['木', '目', '心'], answer: '想',
+    options: ['想', '相', '思', '愁', '愛', '忘'],
+    meaning: '思考、想念',
+    explain: '用眼看樹（相），心中思量 = 想',
+    jyutping: 'soeng2', strokes: 13,
+    type: '形聲字'
+  },
+  {
+    parts: ['立', '日', '心'], answer: '意',
+    options: ['意', '思', '想', '音', '志', '念'],
+    meaning: '心意、想法',
+    explain: '心中發出的聲音 = 意思',
+    jyutping: 'ji3', strokes: 13,
+    type: '會意字'
+  },
+  {
+    parts: ['宀', '子'], answer: '字',
+    options: ['字', '安', '完', '家', '宇', '它'],
+    meaning: '文字',
+    explain: '在屋子下教導孩子 = 學文字',
+    jyutping: 'zi6', strokes: 6,
+    type: '會意字'
+  },
+  {
+    parts: ['田', '力'], answer: '男',
+    options: ['男', '田', '力', '甲', '由', '畏'],
+    meaning: '男人',
+    explain: '在田裡出力工作 = 男人',
+    jyutping: 'naam4', strokes: 7,
+    type: '會意字'
+  },
+  {
+    parts: ['小', '大'], answer: '尖',
+    options: ['尖', '大', '小', '少', '尚', '夾'],
+    meaning: '尖銳',
+    explain: '上小下大 = 尖尖形狀',
+    jyutping: 'zim1', strokes: 6,
+    type: '會意字'
+  },
+  {
+    parts: ['不', '正'], answer: '歪',
+    options: ['歪', '正', '不', '止', '此', '步'],
+    meaning: '歪斜',
+    explain: '不 + 正 = 不正即歪',
+    jyutping: 'waai1', strokes: 9,
+    type: '會意字'
+  },
+  // === 進階題（4-5 個部件） ===
+  {
+    parts: ['木', '十', '豆', '寸'], answer: '樹',
+    options: ['樹', '林', '森', '村', '機', '棵'],
+    meaning: '樹木',
+    explain: '木 + 十 + 豆 + 寸 → 一棵樹',
+    jyutping: 'syu6', strokes: 16,
+    type: '形聲字'
+  },
+  {
+    parts: ['亡', '口', '月', '貝', '凡'], answer: '贏',
+    options: ['贏', '敗', '輸', '勝', '負', '財'],
+    meaning: '贏得、勝利',
+    explain: '亡 + 口 + 月 + 貝 + 凡 → 比賽獲勝',
+    jyutping: 'jeng4', strokes: 20,
+    type: '形聲字'
+  },
+  {
+    parts: ['口', '口', '犬', '口', '口'], answer: '器',
+    options: ['器', '品', '呂', '回', '昌', '哭'],
+    meaning: '器具、工具',
+    explain: '四口圍一犬 → 器皿用具',
+    jyutping: 'hei3', strokes: 16,
+    type: '會意字'
+  },
+  {
+    parts: ['日', '刀', '口', '火'], answer: '照',
+    options: ['照', '昭', '召', '烈', '煮', '然'],
+    meaning: '照亮、照射',
+    explain: '日（太陽）+ 刀 + 口 + 火 → 光照四方',
+    jyutping: 'ziu3', strokes: 13,
+    type: '形聲字'
+  },
+  {
+    parts: ['艹', '臣', '皿'], answer: '藍',
+    options: ['藍', '籃', '監', '草', '盆', '盤'],
+    meaning: '藍色',
+    explain: '艹（植物）+ 監（臣 + 皿）→ 藍草提煉的顏色',
+    jyutping: 'laam4', strokes: 18,
+    type: '形聲字'
+  },
+  {
+    parts: ['角', '刀', '牛'], answer: '解',
+    options: ['解', '角', '確', '觸', '分解', '爭'],
+    meaning: '了解、解開',
+    explain: '用刀分解牛角 → 解開、明白',
+    jyutping: 'gaai2', strokes: 13,
+    type: '會意字'
+  },
+  {
+    parts: ['自', '田', '艹'], answer: '鼻',
+    options: ['鼻', '自', '臭', '息', '思', '胃'],
+    meaning: '鼻子',
+    explain: '自（鼻子象形）＋ 田 ＋ 艹 → 我們的鼻子',
+    jyutping: 'bei6', strokes: 14,
+    type: '形聲字'
+  },
+  {
+    parts: ['王', '白', '石'], answer: '碧',
+    options: ['碧', '王', '珀', '岩', '碧綠', '璧'],
+    meaning: '碧綠色',
+    explain: '王（玉）+ 白 + 石 → 青綠色的寶石',
+    jyutping: 'bik1', strokes: 14,
+    type: '會意字'
+  },
+  {
+    parts: ['竹', '目', '廾'], answer: '算',
+    options: ['算', '筆', '等', '答', '箱', '笑'],
+    meaning: '計算',
+    explain: '竹（算籌）+ 目 + 廾（雙手）→ 用竹籤來數數',
+    jyutping: 'syun3', strokes: 14,
+    type: '會意字'
+  },
+  {
+    parts: ['雨', '足', '各'], answer: '露',
+    options: ['露', '雷', '霧', '路', '霞', '霜'],
+    meaning: '露水',
+    explain: '雨 + 足 + 各 → 夜晚凝結的水珠',
+    jyutping: 'lou6', strokes: 21,
+    type: '形聲字'
+  }
+];
+
+/* ============================================================
+   遊戲變數
+   ============================================================ */
+let questionOrder = [];
+let timerInterval = null;
+let timeRemaining = 20;
+let isAnswerLocked = false;
+let hintUsedThisQ = false;
+let currentQData = null;
+let currentShuffledOptions = [];
+
+const TOTAL_QUESTIONS = 10;
+const TIME_PER_Q = 20;
+
+/* ============================================================
+   畫面切換 (含 Timer 清理)
+   ============================================================ */
+function scrollToTop() {
+  window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+}
+
+function switchScreen(screenId) {
+  // 清理遊戲 timer
+  if (screenId !== 'screen-game') {
+    stopTimer();
+  }
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(screenId);
+  if (target) {
+    target.classList.add('active');
+    scrollToTop();
+    GameState.currentScreen = screenId.replace('screen-', '');
+  }
+}
+
+/* ============================================================
+   Fisher-Yates 洗牌
+   ============================================================ */
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ============================================================
+   startGame()
+   ============================================================ */
+function startGame() {
+  GameState.currentQuestion = 0;
+  GameState.score = 0;
+  GameState.combo = 0;
+  GameState.maxCombo = 0;
+  GameState.correctCount = 0;
+  GameState.collectedChars = [];
+  GameState.hintsUsed = 0;
+  GameState.totalTimeUsed = 0;
+  questionOrder = shuffleArray([...Array(gameData.length).keys()]).slice(0, TOTAL_QUESTIONS);
+  isAnswerLocked = false;
+  hintUsedThisQ = false;
+
+  switchScreen('screen-game');
+  updateScoreDisplay();
+  updateComboBadge();
+  renderQuestion(0);
+}
+
+/* ============================================================
+   renderQuestion(index)
+   ============================================================ */
+function renderQuestion(index) {
+  isAnswerLocked = false;
+  hintUsedThisQ = false;
+  timeRemaining = TIME_PER_Q;
+
+  const data = gameData[questionOrder[index]];
+  currentQData = data;
+  currentShuffledOptions = shuffleArray(data.options);
+
+  // 更新題號
+  document.getElementById('q-curr').textContent = index + 1;
+
+  // 渲染部件
+  const partsRow = document.getElementById('parts-row');
+  partsRow.innerHTML = '';
+  data.parts.forEach((part, i) => {
+    if (i > 0) {
+      const plus = document.createElement('span');
+      plus.className = 'plus-sign';
+      plus.textContent = '+';
+      partsRow.appendChild(plus);
+    }
+    const card = document.createElement('div');
+    card.className = 'part-card';
+    card.textContent = part;
+    card.setAttribute('data-part-index', i);
+    partsRow.appendChild(card);
+  });
+
+  // 重置熔爐結果
+  const forgeResult = document.getElementById('forge-char-result');
+  forgeResult.textContent = '?';
+  forgeResult.className = 'forge-char-result';
+
+  // 清空金粉
+  document.getElementById('gold-particles').innerHTML = '';
+
+  // 隱藏逾時覆蓋
+  document.getElementById('timeout-overlay').style.display = 'none';
+
+  // 渲染選項
+  const optionsGrid = document.getElementById('options-grid');
+  optionsGrid.innerHTML = '';
+  currentShuffledOptions.forEach((char, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = char;
+    btn.setAttribute('data-char', char);
+    btn.setAttribute('aria-label', '選項 ' + (i + 1) + '：' + char);
+    btn.addEventListener('click', () => handleAnswer(char, btn));
+    // 鍵盤提示
+    const hint = document.createElement('span');
+    hint.className = 'key-hint';
+    hint.textContent = (i + 1);
+    btn.appendChild(hint);
+    optionsGrid.appendChild(btn);
+  });
+
+  // 更新提示按鈕
+  const hintBtn = document.getElementById('btn-hint');
+  hintBtn.textContent = '💡 提示（剩 1 次）';
+  hintBtn.disabled = false;
+  hintBtn.classList.remove('used');
+
+  // 更新 combo badge
+  updateComboBadge();
+
+  // 啟動計時
+  startTimer();
+}
+
+/* ============================================================
+   計時器
+   ============================================================ */
+function startTimer() {
+  stopTimer();
+  timeRemaining = TIME_PER_Q;
+  updateTimerDisplay();
+  updateTimerBar();
+
+  timerInterval = setInterval(() => {
+    timeRemaining--;
+    updateTimerDisplay();
+    updateTimerBar();
+
+    if (timeRemaining <= 5 && timeRemaining > 0) {
+      playTickSound();
+    }
+
+    if (timeRemaining <= 0) {
+      stopTimer();
+      handleTimeout();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timer-digit');
+  el.textContent = '⏱ ' + timeRemaining;
+  el.classList.remove('warning', 'danger');
+  if (timeRemaining <= 5) {
+    el.classList.add('danger');
+  } else if (timeRemaining <= 10) {
+    el.classList.add('warning');
+  }
+}
+
+function updateTimerBar() {
+  const bar = document.getElementById('timer-bar');
+  const pct = (timeRemaining / TIME_PER_Q) * 100;
+  bar.style.width = pct + '%';
+  bar.classList.remove('gold', 'red', 'danger');
+  if (timeRemaining <= 5) {
+    bar.classList.add('red', 'danger');
+  } else if (timeRemaining <= 10) {
+    bar.classList.add('gold');
+  }
+}
+
+/* ============================================================
+   calculateScore(isCorrect, timeRem, combo, hintUsed)
+   ============================================================ */
+function calculateScore(isCorrect, timeRem, combo, hintUsed) {
+  if (!isCorrect) return 0;
+  let score = hintUsed ? 5 : 10;
+  if (!hintUsed) {
+    score += Math.floor(timeRem * 0.5);
+  }
+  if (combo >= 10) score += 20;
+  else if (combo >= 5) score += 10;
+  else if (combo >= 3) score += 5;
+  else if (combo >= 2) score += 2;
+  return score;
+}
+
+/* ============================================================
+   handleAnswer(selectedChar, btnEl)
+   ============================================================ */
+function handleAnswer(selectedChar, btnEl) {
+  if (isAnswerLocked) return;
+  isAnswerLocked = true;
+  stopTimer();
+
+  const isCorrect = selectedChar === currentQData.answer;
+  const allBtns = document.querySelectorAll('#options-grid .option-btn');
+
+  // 禁用所有按鈕
+  allBtns.forEach(b => b.disabled = true);
+
+  if (isCorrect) {
+    GameState.combo++;
+    if (GameState.combo > GameState.maxCombo) GameState.maxCombo = GameState.combo;
+    GameState.correctCount++;
+    GameState.collectedChars.push(currentQData.answer);
+
+    const qScore = calculateScore(true, timeRemaining, GameState.combo, hintUsedThisQ);
+    GameState.score += qScore;
+    GameState.totalTimeUsed += (TIME_PER_Q - timeRemaining);
+
+    updateScoreDisplay();
+    updateComboBadge();
+
+    // 動畫序列
+    btnEl.classList.add('correct-pick');
+    allBtns.forEach(b => {
+      if (b !== btnEl) b.classList.add('dimmed');
+    });
+
+    playCorrectSound();
+
+    // 部件飛入動畫
+    setTimeout(() => {
+      document.querySelectorAll('#parts-row .part-card').forEach((card, i) => {
+        card.style.animationDelay = (i * 0.1) + 's';
+        card.classList.add('fly-to-forge');
+      });
+    }, 300);
+
+    // 金粉 + 揭曉
+    setTimeout(() => {
+      spawnGoldParticles();
+      playForgeSound();
+      const forgeResult = document.getElementById('forge-char-result');
+      forgeResult.textContent = currentQData.answer;
+      forgeResult.className = 'forge-char-result revealed';
+    }, 800);
+
+    // 顯示解析
+    setTimeout(() => {
+      showAnalysis(true, qScore);
+    }, 1500);
+
+  } else {
+    GameState.combo = 0;
+    GameState.totalTimeUsed += (TIME_PER_Q - timeRemaining);
+    updateComboBadge();
+
+    btnEl.classList.add('wrong-pick');
+    // 高亮正確答案
+    allBtns.forEach(b => {
+      if (b.getAttribute('data-char') === currentQData.answer) {
+        b.classList.add('highlight-correct');
+      } else if (b !== btnEl) {
+        b.classList.add('dimmed');
+      }
+    });
+
+    playWrongSound();
+
+    setTimeout(() => {
+      showAnalysis(false, 0);
+    }, 800);
+  }
+}
+
+/* ============================================================
+   handleTimeout()
+   ============================================================ */
+function handleTimeout() {
+  if (isAnswerLocked) return;
+  isAnswerLocked = true;
+
+  GameState.combo = 0;
+  GameState.totalTimeUsed += TIME_PER_Q;
+  updateComboBadge();
+
+  const allBtns = document.querySelectorAll('#options-grid .option-btn');
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if (b.getAttribute('data-char') === currentQData.answer) {
+      b.classList.add('highlight-correct');
+    } else {
+      b.classList.add('dimmed');
+    }
+  });
+
+  // 顯示逾時文字
+  const overlay = document.getElementById('timeout-overlay');
+  overlay.style.display = 'flex';
+  playWrongSound();
+
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    showAnalysis(false, 0);
+  }, 1200);
+}
+
+/* ============================================================
+   handleSkip()
+   ============================================================ */
+function handleSkip() {
+  if (isAnswerLocked) return;
+  isAnswerLocked = true;
+  stopTimer();
+
+  GameState.combo = 0;
+  GameState.totalTimeUsed += (TIME_PER_Q - timeRemaining);
+  updateComboBadge();
+
+  const allBtns = document.querySelectorAll('#options-grid .option-btn');
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if (b.getAttribute('data-char') === currentQData.answer) {
+      b.classList.add('highlight-correct');
+    } else {
+      b.classList.add('dimmed');
+    }
+  });
+
+  playClickSound();
+
+  setTimeout(() => {
+    showAnalysis(false, 0, true);
+  }, 600);
+}
+
+/* ============================================================
+   handleHint()
+   ============================================================ */
+function handleHint() {
+  if (isAnswerLocked || hintUsedThisQ) return;
+  hintUsedThisQ = true;
+  GameState.hintsUsed++;
+
+  const btn = document.getElementById('btn-hint');
+  btn.textContent = '💡 已使用提示';
+  btn.disabled = true;
+  btn.classList.add('used');
+
+  const hints = [
+    { icon: '✏', text: '這個字有 <strong>' + currentQData.strokes + '</strong> 畫' },
+    { icon: '🔊', text: '粵語拼音：<strong>' + currentQData.jyutping + '</strong>' },
+    { icon: '📖', text: '字義線索：' + currentQData.meaning },
+    { icon: '📚', text: '字類：<strong>' + currentQData.type + '</strong>' }
+  ];
+  const hint = hints[Math.floor(Math.random() * hints.length)];
+
+  // 顯示提示 popup
+  const popup = document.createElement('div');
+  popup.className = 'hint-popup';
+  popup.id = 'hint-popup';
+  popup.innerHTML = `
+    <div class="hint-icon">${hint.icon}</div>
+    <div class="hint-text">${hint.text}</div>
+    <button class="hint-close" id="hint-close-btn">知道了！</button>
+  `;
+  document.body.appendChild(popup);
+
+  document.getElementById('hint-close-btn').addEventListener('click', () => {
+    popup.remove();
+  });
+
+  playClickSound();
+}
+
+/* ============================================================
+   金粉粒子
+   ============================================================ */
+function spawnGoldParticles() {
+  const container = document.getElementById('gold-particles');
+  container.innerHTML = '';
+  const count = 18;
+  for (let i = 0; i < count; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'gold-particle';
+    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+    const dist = 40 + Math.random() * 70;
+    const px = Math.cos(angle) * dist;
+    const py = Math.sin(angle) * dist - 20;
+    const size = 3 + Math.random() * 7;
+    particle.style.cssText = `
+      width:${size}px; height:${size}px;
+      --px:${px}px; --py:${py}px;
+      animation-delay:${Math.random() * 0.2}s;
+      animation-duration:${0.5 + Math.random() * 0.5}s;
+    `;
+    container.appendChild(particle);
+  }
+}
+
+/* ============================================================
+   顯示解析卡片
+   ============================================================ */
+function showAnalysis(isCorrect, qScore, isSkipped = false) {
+  const overlay = document.getElementById('analysis-overlay');
+  const card = document.getElementById('analysis-card');
+  const d = currentQData;
+
+  let sealHTML = '';
+  let charHTML = '';
+  let scoreHTML = '';
+
+  if (isCorrect) {
+    sealHTML = '<div class="ac-seal">⚒ 煉成</div>';
+    charHTML = '<div class="ac-char">' + d.answer + '</div>';
+    scoreHTML = '<div class="ac-score">本題得分：+' + qScore + ' 分</div>';
+  } else {
+    charHTML = '<div class="ac-char">' + d.answer + '</div>';
+    const label = isSkipped ? '已跳過' : '答錯/逾時';
+    scoreHTML = '<div class="ac-score zero">' + label + '：+0 分</div>';
+  }
+
+  const isLastQ = GameState.currentQuestion >= TOTAL_QUESTIONS - 1;
+  const nextLabel = isLastQ ? '🏆 查看成績 →' : '下一題 →';
+
+  card.innerHTML = `
+    ${sealHTML}
+    ${charHTML}
+    <div class="ac-divider"></div>
+    <div class="ac-detail">
+      📖 字義：${d.meaning}<br>
+      ⚒ 組字：${d.explain}<br>
+      🔊 粵拼：${d.jyutping}　✏ 筆畫：${d.strokes} 畫<br>
+      📚 字類：${d.type}
+    </div>
+    <div class="ac-divider"></div>
+    ${scoreHTML}
+    <button class="ac-next-btn" id="ac-next-btn">${nextLabel}</button>
+  `;
+
+  overlay.classList.add('open');
+
+  // 綁定下一題
+  document.getElementById('ac-next-btn').addEventListener('click', () => {
+    overlay.classList.remove('open');
+    playClickSound();
+    nextQuestion();
+  });
+
+  // ESC 也可關閉（但會自動跳到下一題）
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      overlay.classList.remove('open');
+      playClickSound();
+      nextQuestion();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+  // 在 nextQuestion 或關閉時清理
+  const origNext = nextQuestion;
+  // 使用 cleanup 確保 ESC handler 被移除
+  overlay._escCleanup = () => document.removeEventListener('keydown', escHandler);
+}
+
+/* ============================================================
+   nextQuestion()
+   ============================================================ */
+function nextQuestion() {
+  // 清理 ESC handler
+  const overlay = document.getElementById('analysis-overlay');
+  if (overlay._escCleanup) { overlay._escCleanup(); overlay._escCleanup = null; }
+  overlay.classList.remove('open');
+
+  GameState.currentQuestion++;
+
+  if (GameState.currentQuestion >= TOTAL_QUESTIONS) {
+    endGame();
+  } else {
+    renderQuestion(GameState.currentQuestion);
+  }
+}
+
+/* ============================================================
+   成就清單定義
+   ============================================================ */
+const allAchievements = [
+  { id: 'first_play', name: '初入煉字爐', desc: '完成第一次挑戰', icon: '🌱' },
+  { id: 'play_5', name: '勤學煉字', desc: '完成 5 次挑戰', icon: '📚' },
+  { id: 'play_10', name: '煉字常客', desc: '完成 10 次挑戰', icon: '🎓' },
+  { id: 'score_180', name: '初窺門徑', desc: '單次得分達 180 分', icon: '⭐' },
+  { id: 'score_240', name: '煉字大師', desc: '單次得分達 240 分', icon: '🏆' },
+  { id: 'perfect', name: '煉字仙人', desc: '單次答對全部 10 題', icon: '👑' },
+  { id: 'combo_5', name: '連擊高手', desc: '達成 5 連對', icon: '🔥' },
+  { id: 'combo_10', name: '煉字如神', desc: '達成 10 連對', icon: '⚡' },
+  { id: 'no_hint', name: '獨立思考', desc: '完成挑戰且不使用提示', icon: '🧠' },
+  { id: 'speed', name: '雷霆速度', desc: '平均答題用時 < 5 秒', icon: '💨' }
+];
+
+/* ============================================================
+   endGame()
+   ============================================================ */
+function endGame() {
+  stopTimer();
+  isAnswerLocked = true;
+
+  GameState.totalPlayed++;
+  if (GameState.score > GameState.highScore) {
+    GameState.highScore = GameState.score;
+  }
+
+  // 檢查成就
+  const newlyUnlocked = checkAchievements();
+  saveState();
+
+  // 進入結算頁
+  switchScreen('screen-result');
+  renderResultScreen(newlyUnlocked);
+}
+
+/* ============================================================
+   checkAchievements() — 回傳新解鎖的成就清單
+   ============================================================ */
+function checkAchievements() {
+  const newlyUnlocked = [];
+  const avgTime = GameState.correctCount > 0 ? GameState.totalTimeUsed / GameState.correctCount : 999;
+
+  const conditions = {
+    first_play: GameState.totalPlayed >= 1,
+    play_5: GameState.totalPlayed >= 5,
+    play_10: GameState.totalPlayed >= 10,
+    score_180: GameState.score >= 180,
+    score_240: GameState.score >= 240,
+    perfect: GameState.correctCount === TOTAL_QUESTIONS,
+    combo_5: GameState.maxCombo >= 5,
+    combo_10: GameState.maxCombo >= 10,
+    no_hint: GameState.hintsUsed === 0 && GameState.correctCount > 0,
+    speed: avgTime < 5 && GameState.correctCount >= 8
+  };
+
+  allAchievements.forEach(ach => {
+    if (conditions[ach.id] && !GameState.unlockedAchievements.includes(ach.id)) {
+      GameState.unlockedAchievements.push(ach.id);
+      newlyUnlocked.push(ach);
+    }
+  });
+
+  return newlyUnlocked;
+}
+
+/* ============================================================
+   評等計算
+   ============================================================ */
+function getGrade(score) {
+  if (score >= 270) return { grade: 'S', label: '煉字仙人', stars: '⭐⭐⭐⭐⭐', cls: 's' };
+  if (score >= 240) return { grade: 'A+', label: '煉字大師', stars: '⭐⭐⭐⭐', cls: 'ap' };
+  if (score >= 180) return { grade: 'A', label: '初窺門徑', stars: '⭐⭐⭐', cls: 'a' };
+  if (score >= 120) return { grade: 'B', label: '努力學習', stars: '⭐⭐', cls: 'b' };
+  if (score >= 60)  return { grade: 'C', label: '需要練習', stars: '⭐', cls: 'c' };
+  return { grade: 'D', label: '再接再厲', stars: '', cls: 'd' };
+}
+
+/* ============================================================
+   renderResultScreen(newlyUnlocked)
+   ============================================================ */
+function renderResultScreen(newlyUnlocked) {
+  const score = GameState.score;
+  const g = getGrade(score);
+
+  // 標題
+  let titleText, titleCls;
+  if (score >= 240)      { titleText = '煉字大師！'; titleCls = 'grade-s'; }
+  else if (score >= 180) { titleText = '煉字有成！'; titleCls = 'grade-a'; }
+  else if (score >= 120) { titleText = '不錯喔！'; titleCls = 'grade-b'; }
+  else if (score >= 60)  { titleText = '繼續加油！'; titleCls = 'grade-c'; }
+  else                   { titleText = '再接再厲！'; titleCls = 'grade-d'; }
+
+  const titleEl = document.getElementById('result-title');
+  titleEl.textContent = titleText;
+  titleEl.className = 'result-title brush-title ' + titleCls;
+
+  // 玩家名稱
+  document.getElementById('rs-player').textContent = GameState.playerName;
+
+  // 分數
+  const scoreEl = document.getElementById('rs-big-score');
+  scoreEl.textContent = score;
+  scoreEl.style.animation = 'none';
+  scoreEl.offsetHeight;
+  scoreEl.style.animation = 'countUp 0.8s ease';
+
+  // 評等
+  const gradeEl = document.getElementById('rs-grade');
+  gradeEl.textContent = g.grade + ' 級 — ' + g.label + ' ' + g.stars;
+  gradeEl.className = 'rs-grade ' + g.cls;
+  gradeEl.style.animation = 'none';
+  gradeEl.offsetHeight;
+  gradeEl.style.animation = 'bounceIn 0.6s ease 0.3s both';
+
+  // 火焰邊框（高分限定）
+  const scoreCard = document.getElementById('result-score-card');
+  scoreCard.classList.toggle('flame-glow', score >= 240);
+
+  // 統計
+  const avgTime = GameState.correctCount > 0 ? (GameState.totalTimeUsed / GameState.correctCount).toFixed(1) : '--';
+  document.getElementById('stat-correct').textContent = GameState.correctCount + ' / ' + TOTAL_QUESTIONS;
+  document.getElementById('stat-avgtime').textContent = avgTime !== '--' ? avgTime + ' 秒' : '--';
+  document.getElementById('stat-combo').textContent = GameState.maxCombo + ' 連對';
+  document.getElementById('stat-hints').textContent = GameState.hintsUsed + ' 次';
+
+  // 特效
+  document.getElementById('stars-container').innerHTML = '';
+  if (score >= 240) {
+    spawnFireworks();
+  } else if (score >= 120) {
+    spawnStars();
+  } else {
+    spawnEncouragement();
+  }
+
+  // 煉字成果
+  renderCollectedChars();
+
+  // 成就通知
+  if (newlyUnlocked && newlyUnlocked.length > 0) {
+    newlyUnlocked.forEach((ach, i) => {
+      setTimeout(() => showAchievementNotification(ach), i * 1200);
+    });
+  }
+}
+
+/* ============================================================
+   煙火特效 (≥ 240 分)
+   ============================================================ */
+function spawnFireworks() {
+  const container = document.getElementById('result-score-card');
+  const colors = ['#C8423D', '#D4A82C', '#FFD54F', '#E8743C', '#FF9A5C', '#6B8E4E', '#3A6B8C', '#FF6B6B'];
+  const waves = 3;
+
+  for (let w = 0; w < waves; w++) {
+    setTimeout(() => {
+      const cx = 30 + Math.random() * 40; // center x (%)
+      const cy = 25 + Math.random() * 30; // center y (%)
+      const count = 18 + Math.floor(Math.random() * 14);
+
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'firework-particle';
+        const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.3;
+        const dist = 40 + Math.random() * 90;
+        const size = 3 + Math.random() * 5;
+        p.style.cssText = `
+          left:${cx}%; top:${cy}%;
+          width:${size}px; height:${size}px;
+          background:${colors[Math.floor(Math.random() * colors.length)]};
+          --fx:${Math.cos(angle) * dist}px; --fy:${Math.sin(angle) * dist}px;
+          animation-delay:${Math.random() * 0.15}s;
+          animation-duration:${0.8 + Math.random() * 0.6}s;
+        `;
+        container.appendChild(p);
+        setTimeout(() => p.remove(), 1600);
+      }
+    }, w * 400);
+  }
+}
+
+/* ============================================================
+   星星特效 (120-239 分)
+   ============================================================ */
+function spawnStars() {
+  const container = document.getElementById('stars-container');
+  const emojis = ['⭐', '✨', '🌟', '💫'];
+  for (let i = 0; i < 14; i++) {
+    const star = document.createElement('div');
+    star.className = 'star-particle';
+    star.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    star.style.cssText = `
+      left:${5 + Math.random() * 90}%;
+      top:${5 + Math.random() * 90}%;
+      font-size:${1.2 + Math.random() * 1.8}rem;
+      animation-delay:${Math.random() * 1.5}s;
+      animation-duration:${1.2 + Math.random() * 1.8}s;
+    `;
+    container.appendChild(star);
+  }
+}
+
+/* ============================================================
+   鼓勵特效 (< 120 分)
+   ============================================================ */
+function spawnEncouragement() {
+  const container = document.getElementById('stars-container');
+  const emojis = ['💪', '加油', '🌟', '📖', '🎯'];
+  for (let i = 0; i < 8; i++) {
+    const el = document.createElement('div');
+    el.className = 'encourage-emoji';
+    el.textContent = emojis[i % emojis.length];
+    el.style.cssText = `
+      left:${8 + Math.random() * 84}%;
+      top:${10 + Math.random() * 80}%;
+      animation-delay:${Math.random() * 0.8}s;
+      animation-duration:${0.8 + Math.random() * 1.2}s;
+      font-size:${1.2 + Math.random() * 1.6}rem;
+    `;
+    container.appendChild(el);
+  }
+}
+
+/* ============================================================
+   煉字成果網格
+   ============================================================ */
+function renderCollectedChars() {
+  const grid = document.getElementById('result-chars');
+  const chars = GameState.collectedChars;
+
+  if (chars.length === 0) {
+    grid.innerHTML = '<div class="no-chars-msg">這次沒有煉成漢字，下次再加油！💪</div>';
+    return;
+  }
+
+  grid.innerHTML = chars.map(char => {
+    // 從題庫找對應資料
+    const data = gameData.find(d => d.answer === char);
+    const jp = data ? data.jyutping : '';
+    return `
+      <div class="char-chip" data-char="${char}" title="${data ? data.meaning : ''}">
+        <span class="chip-char">${char}</span>
+        <span class="chip-jp">${jp}</span>
+      </div>`;
+  }).join('');
+
+  // 點擊查看詳情
+  grid.querySelectorAll('.char-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const char = chip.getAttribute('data-char');
+      const data = gameData.find(d => d.answer === char);
+      if (data) showCharDetail(data);
+    });
+  });
+}
+
+/* ============================================================
+   漢字詳情 Modal
+   ============================================================ */
+function showCharDetail(data) {
+  const overlay = document.getElementById('char-detail-modal');
+  const card = document.getElementById('char-detail-card');
+  card.innerHTML = `
+    <div class="ac-seal">⚒ 煉成</div>
+    <div class="ac-char">${data.answer}</div>
+    <div class="ac-divider"></div>
+    <div class="ac-detail">
+      📖 字義：${data.meaning}<br>
+      ⚒ 組字：${data.explain}<br>
+      🔊 粵拼：${data.jyutping}　✏ 筆畫：${data.strokes} 畫<br>
+      📚 字類：${data.type}<br>
+      🧩 部件：${data.parts.join(' + ')}
+    </div>
+    <button class="ac-next-btn" id="char-detail-close">關閉</button>
+  `;
+  overlay.classList.add('open');
+
+  const closeBtn = document.getElementById('char-detail-close');
+  closeBtn.addEventListener('click', () => overlay.classList.remove('open'));
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+}
+
+/* ============================================================
+   成就通知動畫
+   ============================================================ */
+function showAchievementNotification(ach) {
+  const container = document.getElementById('ach-notifications');
+  const el = document.createElement('div');
+  el.className = 'ach-notification';
+  el.innerHTML = `
+    <span class="ach-n-icon">${ach.icon}</span>
+    <div class="ach-n-info">
+      <h4>🏆 解鎖成就：${ach.name}</h4>
+      <p>${ach.desc}</p>
+    </div>
+  `;
+  container.appendChild(el);
+
+  // 5 秒後自動移除
+  setTimeout(() => {
+    if (el.parentNode) el.remove();
+  }, 5200);
+}
+
+/* ============================================================
+   分享成績
+   ============================================================ */
+function shareResult() {
+  const g = getGrade(GameState.score);
+  const avgTime = GameState.correctCount > 0 ? (GameState.totalTimeUsed / GameState.correctCount).toFixed(1) : '--';
+  const text = `我在「部件煉字爐」獲得 ${GameState.score} 分！🎉
+評等：${g.grade} 級 — ${g.label}
+答對題數：${GameState.correctCount}/${TOTAL_QUESTIONS}
+最高連擊：${GameState.maxCombo} 連對
+平均用時：${avgTime} 秒
+快來挑戰吧！⚒`;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showShareToast('✅ 已複製成績到剪貼板！');
+    }).catch(() => {
+      showShareToast('📤 ' + text);
+    });
+  } else {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showShareToast('✅ 已複製成績到剪貼板！');
+  }
+}
+
+function showShareToast(msg) {
+  const existing = document.querySelector('.share-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.className = 'share-toast';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2200);
+}
+
+/* ============================================================
+   UI 更新輔助
+   ============================================================ */
+function updateScoreDisplay() {
+  document.getElementById('score-live').textContent = GameState.score;
+}
+
+function updateComboBadge() {
+  const badge = document.getElementById('combo-badge');
+  if (GameState.combo >= 2) {
+    badge.style.display = 'block';
+    document.getElementById('combo-count').textContent = GameState.combo;
+    badge.style.animation = 'none';
+    badge.offsetHeight;
+    badge.style.animation = 'comboJump 0.5s ease';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+/* ============================================================
+   開始按鈕
+   ============================================================ */
+function handleStartClick() {
+  playClickSound();
+  startGame();
+}
+
+document.getElementById('btn-start').addEventListener('click', handleStartClick);
+
+/* ============================================================
+   規則摺疊面板
+   ============================================================ */
+const btnRules = document.getElementById('btn-rules');
+const rulesContent = document.getElementById('rules-content');
+
+btnRules.addEventListener('click', () => {
+  const isOpen = rulesContent.classList.contains('open');
+  if (isOpen) {
+    rulesContent.classList.remove('open');
+    rulesContent.hidden = true;
+    btnRules.classList.remove('open');
+    btnRules.setAttribute('aria-expanded', 'false');
+    btnRules.setAttribute('aria-label', '展開遊戲規則');
+  } else {
+    rulesContent.hidden = false;
+    rulesContent.classList.add('open');
+    btnRules.classList.add('open');
+    btnRules.setAttribute('aria-expanded', 'true');
+    btnRules.setAttribute('aria-label', '收合遊戲規則');
+  }
+  playClickSound();
+});
+
+/* ============================================================
+   成就 Modal（更新版）
+   ============================================================ */
+const modalOverlay = document.getElementById('achievement-modal');
+const btnAchievements = document.getElementById('btn-achievements');
+const btnModalClose = document.getElementById('btn-modal-close');
+
+function openAchievementModal() {
+  updateAchievementList();
+  modalOverlay.classList.add('open');
+  modalOverlay.setAttribute('aria-hidden', 'false');
+  const modalBody = document.getElementById('achievement-modal-body');
+  if (modalBody) modalBody.scrollTop = 0;
+  btnModalClose.focus();
+}
+
+function closeAchievementModal() {
+  modalOverlay.classList.remove('open');
+  modalOverlay.setAttribute('aria-hidden', 'true');
+  btnAchievements.focus();
+}
+
+function updateAchievementList() {
+  const unlockedCount = GameState.unlockedAchievements.length;
+  const totalCount = allAchievements.length;
+  const pct = Math.round((unlockedCount / totalCount) * 100);
+
+  const list = document.getElementById('achievement-list');
+  list.innerHTML = `
+    <div style="text-align:center;margin-bottom:12px;">
+      <span style="font-family:var(--font-brush);font-size:1rem;">已解鎖 ${unlockedCount} / ${totalCount}</span>
+      <div style="width:100%;height:8px;background:rgba(180,160,120,0.2);border-radius:4px;margin-top:4px;overflow:hidden;">
+        <div style="width:${pct}%;height:100%;background:var(--tea-gold);border-radius:4px;transition:width 0.5s;"></div>
+      </div>
+    </div>
+    ${allAchievements.map(a => {
+      const unlocked = GameState.unlockedAchievements.includes(a.id);
+      return `
+        <div class="achievement-item${unlocked ? '' : ' locked'}">
+          <span class="achievement-icon">${a.icon}</span>
+          <div class="achievement-info">
+            <h4>${a.name}</h4>
+            <p>${unlocked ? '✅ 已解鎖' : '🔒 ' + a.desc}</p>
+          </div>
+        </div>`;
+    }).join('')}
+  `;
+}
+
+btnAchievements.addEventListener('click', () => {
+  playClickSound();
+  openAchievementModal();
+});
+
+btnModalClose.addEventListener('click', () => {
+  playClickSound();
+  closeAchievementModal();
+});
+
+modalOverlay.addEventListener('click', (e) => {
+  if (e.target === modalOverlay) closeAchievementModal();
+});
+
+/* ============================================================
+   遊戲控制：返回按鈕 → 離開確認 Modal
+   ============================================================ */
+document.getElementById('btn-game-back').addEventListener('click', () => {
+  if (isAnswerLocked === false && timerInterval) {
+    document.getElementById('leave-modal').classList.add('open');
+  } else {
+    stopTimer();
+    switchScreen('screen-home');
+  }
+});
+
+document.getElementById('btn-leave-yes').addEventListener('click', () => {
+  document.getElementById('leave-modal').classList.remove('open');
+  stopTimer();
+  switchScreen('screen-home');
+  playClickSound();
+});
+
+document.getElementById('btn-leave-no').addEventListener('click', () => {
+  document.getElementById('leave-modal').classList.remove('open');
+  playClickSound();
+});
+
+document.getElementById('leave-modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) {
+    e.currentTarget.classList.remove('open');
+  }
+});
+
+/* ============================================================
+   遊戲控制：跳過 / 提示
+   ============================================================ */
+document.getElementById('btn-skip').addEventListener('click', () => {
+  if (!isAnswerLocked) handleSkip();
+});
+
+document.getElementById('btn-hint').addEventListener('click', () => {
+  if (!isAnswerLocked && !hintUsedThisQ) handleHint();
+});
+
+/* ============================================================
+   鍵盤快捷鍵
+   ============================================================ */
+document.addEventListener('keydown', (e) => {
+  // ESC 處理
+  if (e.key === 'Escape') {
+    const analysisOverlay = document.getElementById('analysis-overlay');
+    const leaveModal = document.getElementById('leave-modal');
+    const charModal = document.getElementById('char-detail-modal');
+    if (leaveModal.classList.contains('open')) { leaveModal.classList.remove('open'); return; }
+    if (charModal.classList.contains('open')) { charModal.classList.remove('open'); return; }
+    if (modalOverlay.classList.contains('open')) { closeAchievementModal(); return; }
+    if (analysisOverlay.classList.contains('open')) {
+      analysisOverlay.classList.remove('open');
+      playClickSound();
+      nextQuestion();
+      return;
+    }
+    return;
+  }
+
+  if (GameState.currentScreen !== 'game' || isAnswerLocked) return;
+
+  const key = e.key.toLowerCase();
+  if (key >= '1' && key <= '6') {
+    const idx = parseInt(key) - 1;
+    const btns = document.querySelectorAll('#options-grid .option-btn');
+    if (btns[idx] && !btns[idx].disabled) {
+      handleAnswer(btns[idx].getAttribute('data-char'), btns[idx]);
+    }
+  }
+  if (key === 'h' && !hintUsedThisQ) handleHint();
+  if (key === 's') handleSkip();
+});
+
+/* ============================================================
+   結算頁按鈕
+   ============================================================ */
+document.getElementById('btn-replay').addEventListener('click', () => {
+  playClickSound();
+  startGame();
+});
+
+document.getElementById('btn-result-home').addEventListener('click', () => {
+  playClickSound();
+  switchScreen('screen-home');
+  updateHistoryDisplay();
+});
+
+document.getElementById('btn-share').addEventListener('click', () => {
+  playClickSound();
+  shareResult();
+});
+
+/* ============================================================
+   歷史成績顯示（含成就計數）
+   ============================================================ */
+function updateHistoryDisplay() {
+  const section = document.getElementById('history-scores');
+  if (GameState.totalPlayed > 0) {
+    section.style.display = 'flex';
+    document.getElementById('display-highscore').textContent = GameState.highScore;
+    document.getElementById('display-played').textContent = GameState.totalPlayed;
+    // 更新成就按鈕
+    const achCount = GameState.unlockedAchievements.length;
+    btnAchievements.setAttribute('title', '成就列表（' + achCount + '/' + allAchievements.length + '）');
+    if (achCount > 0 && !btnAchievements.textContent.includes(achCount)) {
+      btnAchievements.textContent = '🏆';
+    }
+  }
+}
+
+/* ============================================================
+   初始設定
+   ============================================================ */
+updateHistoryDisplay();
+updateSoundButton();
+switchScreen('screen-home');
+
+// 載入動畫
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const loadingEl = document.getElementById('loading-overlay');
+    if (loadingEl) loadingEl.classList.add('hide');
+  }, 900);
+});
+
+console.log('🔥 部件煉字爐已就緒！');
+console.log('   拆字煉字，認識漢字之美');
+console.log('   玩家：' + GameState.playerName);
+console.log('   音效：' + (GameState.soundOn ? '開啟' : '關閉'));
+console.log('   題庫：' + gameData.length + ' 題備選');
+console.log('   成就：' + allAchievements.length + ' 項可解鎖');
+</script>
+
+</body>
+</html>
